@@ -1,0 +1,56 @@
+{
+    "Thursday": [
+        "Meditation",
+        "Gym",
+        "Breakfast",
+        "LeetCode (3h 10m)",
+        "2 Job Applications",
+        "Cleaning (1h)",
+        "Dinner"
+    ],
+    "Friday": [
+        "Meditation",
+        "Gym",
+        "Breakfast",
+        "LeetCode (3h 20m)",
+        "3 Job Applications",
+        "Cleaning (1h)",
+        "Dinner"
+    ],
+    "Saturday": [
+        "Meditation",
+        "Gym",
+        "Breakfast",
+        "LeetCode (3h 30m)",
+        "4 Job Applications",
+        "Cleaning (1h)",
+        "Dinner"
+    ],
+    "Sunday": [
+        "Meditation",
+        "Gym",
+        "Breakfast",
+        "LeetCode (3h 40m)",
+        "5 Job Applications",
+        "Cleaning (1h)",
+        "Dinner"
+    ],
+    "Monday": [
+        "Meditation",
+        "Gym",
+        "Breakfast",
+        "LeetCode (3h 50m)",
+        "5 Job Applications",
+        "Cleaning (1h)",
+        "Dinner"
+    ],
+    "Tuesday": [
+        "Meditation",
+        "Gym",
+        "Breakfast",
+        "LeetCode (4h)",
+        "5 Job Applications",
+        "Cleaning (1h)",
+        "Dinner"
+    ]
+}
