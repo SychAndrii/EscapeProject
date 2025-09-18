@@ -6,20 +6,23 @@ namespace EscapeProject.Task
     {
         public List<TaskGroupEntity> GetTaskGroups()
         {
-            Dictionary<string, string[]> raw = JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText("Task/tasks.json"));
-
-            List<TaskGroupEntity> taskGroups = [];
-
-            foreach (var kvp in raw)
+            var options = new JsonSerializerOptions
             {
-                taskGroups.Add(new TaskGroupEntity
+                PropertyNameCaseInsensitive = true
+            };
+
+            var raw = JsonSerializer.Deserialize<Dictionary<string, TaskEntity[]>>(
+                File.ReadAllText("Task/tasks.json"),
+                options
+            );
+
+            return raw == null
+                ? []
+                : raw.Select(kvp => new TaskGroupEntity
                 {
                     name = kvp.Key,
-                    tasks = kvp.Value.Select(taskName => new TaskEntity { name = taskName }).ToArray()
-                });
-            }
-
-            return taskGroups;
+                    tasks = kvp.Value
+                }).ToList();
         }
     }
 }
