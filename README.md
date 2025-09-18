@@ -1,6 +1,6 @@
 # EscapeProject
 
-## Why this project is created?
+## Why was this project created?
 
 During my self-improvement journey I stumbled upon a couple of problems: 
 
