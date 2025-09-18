@@ -110,7 +110,8 @@ namespace EscapeProject
                                 : task.from != null ? $"{task.from.Value:yyyy-MM-dd HH:mm} – ?" : $"? – {task.until.Value:yyyy-MM-dd HH:mm}";
 
                             var timeTextBuilder = new TextSettingsBuilder(rangeText)
-                                .WithFontSize(10); // smaller for readability
+                                .WithFontSize(10)
+                                .WithFontStyle(TextStyle.ITALIC);
                             pageBuilder.AddText(MARGIN_X + 30, currentY, timeTextBuilder); // indent
                             currentY -= lineHeight;
                         }
