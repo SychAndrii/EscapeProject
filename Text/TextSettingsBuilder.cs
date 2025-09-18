@@ -8,6 +8,7 @@ namespace EscapeProject.Text
         private float fontSize;
         private PdfFont? font;
         private TextWeight fontWeight;
+        private TextStyle fontStyle;
 
         public TextSettingsBuilder(string text)
         {
@@ -38,12 +39,19 @@ namespace EscapeProject.Text
             return this;
         }
 
+        public TextSettingsBuilder WithFontStyle(TextStyle fontStyle)
+        {
+            this.fontStyle = fontStyle;
+            return this;
+        }
+
         internal TextSettings Build()
         {
             TextSettings ts = new TextSettings
             {
                 Text = text,
-                FontWeight = fontWeight
+                FontWeight = fontWeight,
+                FontStyle = fontStyle
             };
             if (fontSize != 0f)
             {

@@ -26,6 +26,11 @@ namespace EscapeProject.Text
                     .SetFontSize(textSettings.FontSize)
                     .SetFixedPosition(x, y, textSettings.TextWidth + 10);
 
+                if (textSettings.FontStyle == TextStyle.ITALIC)
+                {
+                    par.SetItalic();
+                }
+
                 layoutCanvas.Add(par);
             }
         }

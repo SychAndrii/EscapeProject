@@ -27,5 +27,6 @@ namespace EscapeProject.Text
         internal float TextWidth => Font.GetWidth(Text, fontSize);
         internal PdfFont Font { get; set; } = PdfFontFactory.CreateFont(FontConstants.HELVETICA);
         internal TextWeight FontWeight { get; set; } = TextWeight.NORMAL;
+        internal TextStyle FontStyle { get; set; } = TextStyle.NORMAL;
     }
 }
