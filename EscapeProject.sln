@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProject", "EscapeProj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaseDomain", "..\BaseDomain\BaseDomain.csproj", "{328970EB-1E5A-448D-9DDB-5E009537C02D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectDomain", "..\EscapeProjectDomain\EscapeProjectDomain.csproj", "{9A443687-8C19-4C96-99D0-278E57C24EA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{328970EB-1E5A-448D-9DDB-5E009537C02D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{328970EB-1E5A-448D-9DDB-5E009537C02D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{328970EB-1E5A-448D-9DDB-5E009537C02D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A443687-8C19-4C96-99D0-278E57C24EA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A443687-8C19-4C96-99D0-278E57C24EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A443687-8C19-4C96-99D0-278E57C24EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A443687-8C19-4C96-99D0-278E57C24EA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

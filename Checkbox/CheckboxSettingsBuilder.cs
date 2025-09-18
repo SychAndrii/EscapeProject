@@ -1,6 +1,7 @@
-﻿using EscapeProject.Text;
+﻿using EscapeProject.Checkbox;
+using EscapeProject.Text;
 
-namespace EscapeProject.Checkbox
+namespace EscapeProjectDomain.Checkbox
 {
     public class CheckboxSettingsBuilder
     {

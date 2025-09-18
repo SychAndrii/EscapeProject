@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using EscapeProject.Checkbox;
 using EscapeProject.Task;
 using EscapeProject.Text;
+using EscapeProjectDomain.Checkbox;
 using iText.Kernel.Geom;
 using iText.Layout;
 

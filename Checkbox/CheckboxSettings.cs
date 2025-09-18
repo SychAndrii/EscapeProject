@@ -1,4 +1,5 @@
 ﻿using EscapeProject.Text;
+using EscapeProjectDomain.Checkbox;
 
 namespace EscapeProject.Checkbox
 {
