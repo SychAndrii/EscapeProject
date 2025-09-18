@@ -9,8 +9,8 @@ During my self-improvement journey I stumbled upon a couple of problems:
 
 **Escape Project** is created to solve the problems I came across by following this simple philosophy: ***No extra installations, no extra registrations, no extra features***.
 
-1. The UI of Escape Project is very simple, it uses PDF files to construct the UI for your tasks. Chances are, you have already interacted with PDF format. You don't have to learn the user interfaces from scratch, which enhances user experience. Besides, this app has an MIT license, which means you are free to modify it and distribute it however you like.
-2. Since PDF files are used for displaying your task management UI, you will easily be able to save your list of tasks and send it to your phone and keep the copy of your tasks on another device. Due to usage of checkboxes for marking the completed tasks, Escape Project is much easier to deal with than a regular notepad.
+1. The UI of Escape Project is very simple, it uses PDF files to construct the UI for your tasks. Chances are, you have already interacted with PDF format. You don't have to learn user interface from scratch, which enhances user experience. Besides, this app has MIT license, which means you are free to modify it and distribute it however you like.
+2. Since PDF files are used for displaying the tasks, you will easily be able to save your them and send the file to your phone and keep the copy of your tasks on another device. Due to the usage of checkboxes for marking the completed tasks, Escape Project is much easier to deal with than a regular notepad.
 
 ## Plans for the future
 
