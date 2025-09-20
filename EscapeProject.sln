@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectDomain", "..\E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectApplication", "..\EscapeProjectApplication\EscapeProjectApplication.csproj", "{84DBB6E8-6DA1-4776-B052-95F9DF7D2F90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectPresentation", "..\EscapeProjectPresentation\EscapeProjectPresentation.csproj", "{2DBE7A42-7DA7-4C0B-BD9F-BE2FBC843169}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectPresentationCLI", "..\EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj", "{2DBE7A42-7DA7-4C0B-BD9F-BE2FBC843169}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
