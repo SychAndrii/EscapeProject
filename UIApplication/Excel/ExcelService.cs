@@ -5,6 +5,8 @@ namespace UIApplication.Excel
 {
     public abstract class ExcelService
     {
+        public const string DEFAULT_WORKSHEET = "Sheet 1";
+
         /* Excel document state */
         public ExcelMetadata ExcelMetadata
         {
@@ -50,11 +52,11 @@ namespace UIApplication.Excel
             get => currentPos;
             set
             {
-                if (value.row < 0 || value.row >= ExcelMetadata.Dimensions.rows)
+                if (value.row < 0)
                 {
-                    throw new Exception("Excel row coordinate in Excel document is out of bounds");
+                    throw new Exception("Excel row coordinate in Excel document must be >= 0");
                 }
-                if (!ExcelMetadata.Dimensions.columns.Contains(value.col))
+                if (!ExcelMetadata.Columns.Contains(value.col))
                 {
                     throw new Exception("Excel column coordinate in Excel document does not exist");
                 }
@@ -66,9 +68,8 @@ namespace UIApplication.Excel
         {
             ExcelMetadata = metadataBuilder.Build();
             OnMetadataSet();
-            string defaultWorksheet = "Sheet 1";
-            CreateNewWorksheet(defaultWorksheet);
-            GoToWorksheet(defaultWorksheet);
+            CreateNewWorksheet(DEFAULT_WORKSHEET);
+            GoToWorksheet(DEFAULT_WORKSHEET);
         }
 
         /* Render methods */
@@ -79,17 +80,32 @@ namespace UIApplication.Excel
         public void GoToWorksheet(string worksheet)
         {
             CurrentWorksheet = worksheet;
-            CurrentPos = (0, ExcelMetadata.Dimensions.columns[0]);
+            CurrentPos = (0, ExcelMetadata.Columns[0]);
             OnCurrentWorksheetChanged();
         }
         public void CreateNewWorksheet(string worksheet)
         {
             Worksheets.Add(worksheet);
-            OnNewWorksheetCreated();
+            OnNewWorksheetCreated(worksheet);
+        }
+        public void RemoveWorksheet(string worksheet)
+        {
+            bool containsWorksheet = Worksheets.Contains(worksheet);
+            if (!containsWorksheet)
+            {
+                throw new Exception($"[{worksheet}] worksheet does not exist in Excel file");
+            }
+            if (containsWorksheet && Worksheets.Count == 1)
+            {
+                throw new Exception($"Cannot delete the only existing worksheet in Excel file");
+            }
+            Worksheets.Remove(worksheet);
+            OnWorksheetDeleted(worksheet);
         }
 
         protected abstract void OnCurrentWorksheetChanged();
-        protected abstract void OnNewWorksheetCreated();
+        protected abstract void OnNewWorksheetCreated(string worksheet);
+        protected abstract void OnWorksheetDeleted(string worksheet);
         protected abstract void OnMetadataSet();
         public abstract void Close();
     }

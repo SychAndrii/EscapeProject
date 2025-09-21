@@ -2,38 +2,34 @@
 {
     public class ExcelMetadata
     {
-        private (int rows, List<string> columns) dimensions;
+        private List<string> columns;
 
         public string Destination
         {
             get;
         }
 
-        public (int rows, List<string> columns) Dimensions
+        public List<string> Columns
         {
-            get => dimensions;
+            get => columns;
             set
             {
-                if (value.rows <= 0)
-                {
-                    throw new Exception($"Number of rows for Excel worksheet must be > 0");
-                }
-                if (value.columns.Count() <= 0)
+                if (value.Count() <= 0)
                 {
                     throw new Exception($"Number of columns for Excel worksheet must be > 0");
                 }
-                if (value.columns.ToHashSet().Count() != value.columns.Count)
+                if (value.ToHashSet().Count() != value.Count)
                 {
                     throw new Exception($"Columns in Excel worksheet must be unique");
                 }
-                dimensions = value;
+                columns = value;
             }
         }
 
-        public ExcelMetadata(string destination, int rows, List<string> columns)
+        public ExcelMetadata(string destination, List<string> columns)
         {
             Destination = destination;
-            Dimensions = (rows, columns);
+            Columns = columns;
         }
     }
 }
