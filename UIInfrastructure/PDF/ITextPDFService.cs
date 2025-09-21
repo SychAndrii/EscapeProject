@@ -1,5 +1,4 @@
-﻿using EscapeProjectApplication.Output.PDF;
-using iText.Forms;
+﻿using iText.Forms;
 using iText.Forms.Fields;
 using iText.IO.Font;
 using iText.Kernel.Colors;
@@ -9,10 +8,11 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
 using iText.Layout;
 using iText.Layout.Element;
+using UIApplication.PDF;
 using UIDomain.Checkbox;
 using UIDomain.Text;
 
-namespace EscapeProjectInfrastructure.Output.PDF
+namespace UIInfrastructure.PDF
 {
     public class ITextPDFService : PDFService
     {

@@ -1,4 +1,4 @@
-﻿namespace EscapeProjectApplication.Output.PDF
+﻿namespace UIApplication.PDF
 {
     public class PDFMetadataBuilder
     {
@@ -34,11 +34,9 @@
             {
                 throw new InvalidOperationException("Destination must be provided before building PDFMetadata.");
             }
-            if (horizontalMargin == null || verticalMargin == null)
-            {
-                throw new InvalidOperationException("Both horizontal and vertical margins must be set before building PDFMetadata.");
-            }
-            return pageWidth == null || pageHeight == null
+            return horizontalMargin == null || verticalMargin == null
+                ? throw new InvalidOperationException("Both horizontal and vertical margins must be set before building PDFMetadata.")
+                : pageWidth == null || pageHeight == null
                 ? throw new InvalidOperationException("Both page width and page height must be set before building PDFMetadata.")
                 : new PDFMetadata(
                 destination!,

@@ -11,14 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EscapeProjectApplication\EscapeProjectApplication.csproj" />
     <ProjectReference Include="..\UIApplication\UIApplication.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Task\tasks.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

@@ -1,27 +1,24 @@
 ﻿using BaseDomain;
-using EscapeProjectApplication.Output.PDF;
+using EscapeProjectApplication.Services;
 using EscapeProjectDomain;
+using UIApplication.PDF;
 using UIDomain.Checkbox;
 using UIDomain.Text;
 
-namespace EscapeProjectApplication.Task
+namespace EscapeProjectInfrastructure.Render
 {
-    public class GenerateTaskPlanPDFUseCase
+    public class PDFRenderService : RenderService
     {
-        private const float LINE_HEIGHT = 15;
-        private readonly TaskGroupRepository taskGroupRepository;
         private readonly PDFServiceFactory pdfServiceFactory;
+        private const float LINE_HEIGHT = 15;
 
-        public GenerateTaskPlanPDFUseCase(TaskGroupRepository taskGroupRepository, PDFServiceFactory pdfServiceFactory)
+        public PDFRenderService(PDFServiceFactory pdfServiceFactory)
         {
-            this.taskGroupRepository = taskGroupRepository;
             this.pdfServiceFactory = pdfServiceFactory;
         }
 
-        public async ValueTask GeneratePlanPDF()
+        public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
-            List<TaskGroupAggregate> taskGroups = await taskGroupRepository.GetTaskGroups();
-
             PDFMetadataBuilder pdfMetadataBuilder = new PDFMetadataBuilder()
                 .WithDestination("file.pdf")
                 .WithDimensions(764, 825)

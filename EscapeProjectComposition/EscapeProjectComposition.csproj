@@ -12,6 +12,8 @@
     <ProjectReference Include="..\EscapeProjectDomain\EscapeProjectDomain.csproj" />
     <ProjectReference Include="..\EscapeProjectInfrastructure\EscapeProjectInfrastructure.csproj" />
     <ProjectReference Include="..\EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj" />
+    <ProjectReference Include="..\UIApplication\UIApplication.csproj" />
+    <ProjectReference Include="..\UIInfrastructure\UIInfrastructure.csproj" />
   </ItemGroup>
 
 </Project>

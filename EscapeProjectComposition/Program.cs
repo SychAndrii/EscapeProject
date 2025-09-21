@@ -1,9 +1,11 @@
-﻿using EscapeProjectApplication.Output.PDF;
-using EscapeProjectApplication.Task;
+﻿using EscapeProjectApplication.Services;
+using EscapeProjectApplication.UseCases;
 using EscapeProjectDomain;
-using EscapeProjectInfrastructure.Output.PDF;
+using EscapeProjectInfrastructure.Render;
 using EscapeProjectInfrastructure.Task;
 using EscapeProjectPresentationCLI;
+using UIApplication.PDF;
+using UIInfrastructure.PDF;
 
 namespace EscapeProjectComposition
 {
@@ -13,8 +15,9 @@ namespace EscapeProjectComposition
         {
             PDFServiceFactory pdfServiceFactory = new ITextPDFServiceFactory();
             TaskGroupRepository taskGroupRepository = new JSONTaskGroupRepository("Task/tasks.json");
+            RenderService renderService = new PDFRenderService(pdfServiceFactory);
 
-            GenerateTaskPlanPDFUseCase useCase = new GenerateTaskPlanPDFUseCase(taskGroupRepository, pdfServiceFactory);
+            GenerateTaskPlanPDFUseCase useCase = new GenerateTaskPlanPDFUseCase(taskGroupRepository, renderService);
             TasksController tasksController = new TasksController(useCase);
             await tasksController.GenerateTaskPlanPDF();
         }

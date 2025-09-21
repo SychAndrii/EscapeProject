@@ -1,6 +1,6 @@
-﻿using EscapeProjectApplication.Output.PDF;
+﻿using UIApplication.PDF;
 
-namespace EscapeProjectInfrastructure.Output.PDF
+namespace UIInfrastructure.PDF
 {
     public class ITextPDFServiceFactory : PDFServiceFactory
     {

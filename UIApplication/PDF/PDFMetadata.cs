@@ -1,4 +1,4 @@
-﻿namespace EscapeProjectApplication.Output.PDF
+﻿namespace UIApplication.PDF
 {
     public class PDFMetadata
     {

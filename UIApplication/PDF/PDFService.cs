@@ -1,7 +1,7 @@
 ﻿using UIDomain.Checkbox;
 using UIDomain.Text;
 
-namespace EscapeProjectApplication.Output.PDF
+namespace UIApplication.PDF
 {
     public abstract class PDFService
     {

@@ -1,4 +1,4 @@
-﻿using EscapeProjectApplication.Task;
+﻿using EscapeProjectApplication.UseCases;
 
 namespace EscapeProjectPresentationCLI
 {
@@ -13,7 +13,7 @@ namespace EscapeProjectPresentationCLI
 
         public async Task GenerateTaskPlanPDF()
         {
-            await taskPlanUseCase.GeneratePlanPDF();
+            await taskPlanUseCase.Execute();
         }
     }
 }
