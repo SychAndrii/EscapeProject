@@ -12,13 +12,13 @@ namespace UIInfrastructure.Excel
         private SpreadsheetDocument? document;
         private WorkbookPart? workbookPart;
         private Sheets? sheets;
+        private Sheet? currentSheet;
         public OpenXMLExcelService(ExcelMetadataBuilder metadataBuilder) : base(metadataBuilder) { }
 
         public override void Close()
         {
-            workbookPart?.Workbook.Save();  // save the workbook definition
-
-            document?.Dispose(); // important: Close, not Dispose
+            workbookPart?.Workbook.Save();
+            document?.Dispose();
             document = null;
             workbookPart = null;
             sheets = null;
@@ -26,17 +26,93 @@ namespace UIInfrastructure.Excel
 
         public override void RenderCheckbox(CheckboxSettingsBuilder settingsBuilder)
         {
-            throw new NotImplementedException();
+            if (currentSheet == null)
+            {
+                throw new InvalidOperationException("No active sheet.");
+            }
+
+            var settings = settingsBuilder.Build();
+            string checkboxChar = settings.DefaultValue == CheckboxState.ON ? "☑" : "☐";
+
+            WorksheetPart wsPart = (WorksheetPart)workbookPart.GetPartById(currentSheet.Id!);
+            SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
+
+            // ensure row exists
+            Row row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == (uint)CurrentPos.row);
+            if (row == null)
+            {
+                row = new Row { RowIndex = (uint)CurrentPos.row };
+                sheetData.Append(row);
+            }
+
+            // map column name → index
+            int colIndex = ExcelMetadata.Columns.IndexOf(CurrentPos.col) + 1;
+            if (colIndex <= 0)
+            {
+                throw new Exception($"Column '{CurrentPos.col}' not found in metadata.");
+            }
+
+            string colName = GetExcelColumnName(colIndex);
+            string cellRef = $"{colName}{CurrentPos.row}";
+
+            Cell cell = new Cell
+            {
+                CellReference = cellRef,
+                DataType = CellValues.String,
+                CellValue = new CellValue(checkboxChar)
+            };
+
+            row.Append(cell);
+            wsPart.Worksheet.Save();
         }
 
         public override void RenderText(TextSettingsBuilder settingsBuilder)
         {
-            throw new NotImplementedException();
+            if (currentSheet == null)
+            {
+                throw new InvalidOperationException("No active sheet.");
+            }
+
+            var settings = settingsBuilder.Build();
+            string text = settings.Text ?? string.Empty;
+
+            WorksheetPart wsPart = (WorksheetPart)workbookPart.GetPartById(currentSheet.Id!);
+            SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
+
+            // ensure row exists
+            Row row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == (uint)CurrentPos.row);
+            if (row == null)
+            {
+                row = new Row { RowIndex = (uint)CurrentPos.row };
+                sheetData.Append(row);
+            }
+
+            // map column name → index (A,B,C,…)
+            int colIndex = ExcelMetadata.Columns.IndexOf(CurrentPos.col) + 1;
+            if (colIndex <= 0)
+            {
+                throw new Exception($"Column '{CurrentPos.col}' not found in metadata.");
+            }
+
+            string colName = GetExcelColumnName(colIndex);
+            string cellRef = $"{colName}{CurrentPos.row}";
+
+            Cell cell = new Cell
+            {
+                CellReference = cellRef,
+                DataType = CellValues.String,
+                CellValue = new CellValue(text)
+            };
+
+            row.Append(cell);
+            wsPart.Worksheet.Save();
         }
 
         protected override void OnCurrentWorksheetChanged()
         {
-
+            currentSheet = workbookPart.Workbook.Sheets
+                .Elements<Sheet>()
+                .FirstOrDefault(s => s.Name == CurrentWorksheet);
         }
 
         protected override void OnMetadataSet()
@@ -89,6 +165,27 @@ namespace UIInfrastructure.Excel
             sheetData.Append(row);
         }
 
+        protected override void OnWorksheetDeleted(string worksheet)
+        {
+            // 1. Find the <sheet> element by name
+            Sheet sheet = workbookPart.Workbook.Sheets
+                .Elements<Sheet>()
+                .FirstOrDefault(s => s.Name == worksheet);
+
+            // 2. Get the target WorksheetPart from the Id
+            WorksheetPart worksheetPart =
+                (WorksheetPart)workbookPart.GetPartById(sheet.Id!);
+
+            // 3. Remove the <sheet> entry from the workbook
+            sheet.Remove();
+
+            // 4. Delete the part itself
+            workbookPart.DeletePart(worksheetPart);
+
+            // 5. Save changes to the workbook
+            workbookPart.Workbook.Save();
+        }
+
         private string GetExcelColumnName(int columnNumber)
         {
             string columnName = "";
@@ -99,11 +196,6 @@ namespace UIInfrastructure.Excel
                 columnNumber = (columnNumber - modulo) / 26;
             }
             return columnName;
-        }
-
-        protected override void OnWorksheetDeleted(string worksheet)
-        {
-            throw new NotImplementedException();
         }
     }
 }

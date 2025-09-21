@@ -1,6 +1,9 @@
-﻿using EscapeProjectApplication.Services;
+﻿using BaseDomain;
+using EscapeProjectApplication.Services;
 using EscapeProjectDomain;
 using UIApplication.Excel;
+using UIDomain.Checkbox;
+using UIDomain.Text;
 
 namespace EscapeProjectInfrastructure.Render
 {
@@ -20,7 +23,7 @@ namespace EscapeProjectInfrastructure.Render
                 .WithColumns(["Task", "Status", "Duration", "Time Range"]);
             ExcelService excelService = excelServiceFactory
                 .Create(excelMetadataBuilder);
-            /*
+
             foreach (TaskGroupAggregate taskGroup in taskGroups)
             {
                 NormalizedString taskGroupName = taskGroup.Id;
@@ -68,7 +71,6 @@ namespace EscapeProjectInfrastructure.Render
             }
 
             excelService.RemoveWorksheet(ExcelService.DEFAULT_WORKSHEET);
-            */
             excelService.Close();
         }
     }
