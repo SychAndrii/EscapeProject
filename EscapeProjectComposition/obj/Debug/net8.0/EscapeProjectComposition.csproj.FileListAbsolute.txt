@@ -35,3 +35,4 @@ C:\Users\andri\Desktop\Escape\EscapeProjectComposition\bin\Debug\net8.0\EscapePr
 C:\Users\andri\Desktop\Escape\EscapeProjectComposition\bin\Debug\net8.0\BaseDomain.pdb
 C:\Users\andri\Desktop\Escape\EscapeProjectComposition\obj\Debug\net8.0\EscapeProjectComposition.csproj.AssemblyReference.cache
 C:\Users\andri\Desktop\Escape\EscapeProjectComposition\obj\Debug\net8.0\EscapePr.C1AF94BF.Up2Date
+C:\Users\andri\Desktop\Escape\EscapeProjectComposition\obj\Debug\net8.0\EscapeProjectComposition.sourcelink.json

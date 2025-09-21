@@ -24,8 +24,7 @@
       },
       "EscapeProjectApplication/1.0.0": {
         "dependencies": {
-          "EscapeProjectDomain": "1.0.0",
-          "UIDomain": "1.0.0"
+          "EscapeProjectDomain": "1.0.0"
         },
         "runtime": {
           "EscapeProjectApplication.dll": {

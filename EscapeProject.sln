@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectInfrastructure", "EscapeProjectInfrastructure.csproj", "{8944595D-D356-4ECF-8FA5-743AB0B41D19}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectInfrastructure", "EscapeProjectInfrastructure\EscapeProjectInfrastructure.csproj", "{8944595D-D356-4ECF-8FA5-743AB0B41D19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaseDomain", "..\BaseDomain\BaseDomain.csproj", "{328970EB-1E5A-448D-9DDB-5E009537C02D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaseDomain", "BaseDomain\BaseDomain.csproj", "{328970EB-1E5A-448D-9DDB-5E009537C02D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectDomain", "..\EscapeProjectDomain\EscapeProjectDomain.csproj", "{9A443687-8C19-4C96-99D0-278E57C24EA8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectDomain", "EscapeProjectDomain\EscapeProjectDomain.csproj", "{9A443687-8C19-4C96-99D0-278E57C24EA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectApplication", "..\EscapeProjectApplication\EscapeProjectApplication.csproj", "{84DBB6E8-6DA1-4776-B052-95F9DF7D2F90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectApplication", "EscapeProjectApplication\EscapeProjectApplication.csproj", "{84DBB6E8-6DA1-4776-B052-95F9DF7D2F90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectPresentationCLI", "..\EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj", "{2DBE7A42-7DA7-4C0B-BD9F-BE2FBC843169}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectPresentationCLI", "EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj", "{2DBE7A42-7DA7-4C0B-BD9F-BE2FBC843169}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectComposition", "..\EscapeProjectComposition\EscapeProjectComposition.csproj", "{E2A2EE70-BA57-4AE4-A655-E72C79CD47FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeProjectComposition", "EscapeProjectComposition\EscapeProjectComposition.csproj", "{E2A2EE70-BA57-4AE4-A655-E72C79CD47FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

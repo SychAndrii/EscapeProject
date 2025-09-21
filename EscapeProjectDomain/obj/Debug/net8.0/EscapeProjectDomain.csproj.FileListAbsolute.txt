@@ -13,3 +13,4 @@ C:\Users\andri\Desktop\Escape\EscapeProjectDomain\obj\Debug\net8.0\EscapeProject
 C:\Users\andri\Desktop\Escape\EscapeProjectDomain\obj\Debug\net8.0\refint\EscapeProjectDomain.dll
 C:\Users\andri\Desktop\Escape\EscapeProjectDomain\obj\Debug\net8.0\EscapeProjectDomain.pdb
 C:\Users\andri\Desktop\Escape\EscapeProjectDomain\obj\Debug\net8.0\ref\EscapeProjectDomain.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectDomain\obj\Debug\net8.0\EscapeProjectDomain.sourcelink.json

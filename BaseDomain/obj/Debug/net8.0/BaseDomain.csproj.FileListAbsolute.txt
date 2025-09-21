@@ -9,3 +9,4 @@ C:\Users\andri\Desktop\Escape\BaseDomain\obj\Debug\net8.0\BaseDomain.dll
 C:\Users\andri\Desktop\Escape\BaseDomain\obj\Debug\net8.0\refint\BaseDomain.dll
 C:\Users\andri\Desktop\Escape\BaseDomain\obj\Debug\net8.0\BaseDomain.pdb
 C:\Users\andri\Desktop\Escape\BaseDomain\obj\Debug\net8.0\ref\BaseDomain.dll
+C:\Users\andri\Desktop\Escape\BaseDomain\obj\Debug\net8.0\BaseDomain.sourcelink.json

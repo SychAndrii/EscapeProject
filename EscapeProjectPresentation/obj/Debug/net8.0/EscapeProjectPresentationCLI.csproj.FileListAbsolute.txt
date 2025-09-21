@@ -17,3 +17,4 @@ C:\Users\andri\Desktop\Escape\EscapeProjectPresentation\obj\Debug\net8.0\EscapeP
 C:\Users\andri\Desktop\Escape\EscapeProjectPresentation\obj\Debug\net8.0\refint\EscapeProjectPresentationCLI.dll
 C:\Users\andri\Desktop\Escape\EscapeProjectPresentation\obj\Debug\net8.0\EscapeProjectPresentationCLI.pdb
 C:\Users\andri\Desktop\Escape\EscapeProjectPresentation\obj\Debug\net8.0\ref\EscapeProjectPresentationCLI.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectPresentation\obj\Debug\net8.0\EscapeProjectPresentationCLI.sourcelink.json

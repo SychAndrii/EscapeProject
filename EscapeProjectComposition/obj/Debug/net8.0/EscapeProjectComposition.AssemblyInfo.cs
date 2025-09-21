@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EscapeProjectComposition")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+adbd355d89c388f98fb95e29e0447c989612ac38")]
 [assembly: System.Reflection.AssemblyProductAttribute("EscapeProjectComposition")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EscapeProjectComposition")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
