@@ -1,6 +1,12 @@
-﻿namespace EscapeProjectInfrastructure.Render
+﻿using BaseDomain;
+using EscapeProjectApplication.Services;
+using EscapeProjectDomain;
+using UIApplication.Excel;
+using UIDomain.Checkbox;
+using UIDomain.Text;
+
+namespace EscapeProjectInfrastructure.Render
 {
-    /*
     public class ExcelRenderService : RenderService
     {
         private readonly ExcelServiceFactory excelServiceFactory;
@@ -23,74 +29,49 @@
                 NormalizedString taskGroupName = taskGroup.Id;
                 ISet<TaskEntity> tasksForGroup = taskGroup.Tasks;
 
-                if (!CurrentPageCanFitTaskGroup(taskGroup, pdfService))
-                {
-                    pdfService.CreateNewPage();
-                    pdfService.GoToPage(pdfService.TotalPages);
-                }
-
-                TextSettingsBuilder headerBuilder = new TextSettingsBuilder(taskGroupName);
-                headerBuilder
-                    .WithFontWeight(TextWeight.BOLD)
-                    .WithFontSize(20);
-                pdfService.RenderText(headerBuilder);
-
-                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 1.5f));
+                excelService.CreateNewWorksheet(taskGroupName);
+                excelService.GoToWorksheet(taskGroupName);
 
                 foreach (TaskEntity task in tasksForGroup)
                 {
-                    var checkboxText = task.Name;
+                    TextSettingsBuilder headerBuilder = new TextSettingsBuilder(task.Name);
+                    headerBuilder
+                        .WithFontWeight(TextWeight.BOLD)
+                        .WithFontSize(20);
+                    excelService.RenderText(headerBuilder);
+
+                    excelService.CurrentPos = (excelService.CurrentPos.row, "Status");
+                    var checkboxBuilder = new CheckboxSettingsBuilder();
+                    excelService.RenderCheckbox(checkboxBuilder);
+
+                    excelService.CurrentPos = (excelService.CurrentPos.row, "Duration");
                     var durationText = task.Duration();
-
-                    if (durationText != null)
+                    if (durationText == null)
                     {
-                        checkboxText += $" ({durationText})";
+                        durationText = "Unknown";
                     }
 
-                    // Add the main line (task name + duration)
-                    var checkboxTextBuilder = new TextSettingsBuilder(checkboxText);
-                    var checkboxBuilder = new CheckboxSettingsBuilder()
-                        .WithText(checkboxTextBuilder);
-                    pdfService.RenderCheckbox(checkboxBuilder);
+                    var durationTextBuilder = new TextSettingsBuilder(durationText);
+                    excelService.RenderText(durationTextBuilder);
 
-                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
-
-                    // Add the date/time line underneath (smaller font)
+                    excelService.CurrentPos = (excelService.CurrentPos.row, "Time Range");
                     var rangeText = task.Range();
-                    if (rangeText != null)
+                    if (rangeText == null)
                     {
-                        var timeTextBuilder = new TextSettingsBuilder(rangeText)
-                            .WithFontSize(10)
-                            .WithFontStyle(TextStyle.ITALIC);
-                        pdfService.RenderText(timeTextBuilder);
+                        rangeText = "Unknown";
                     }
-                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 1.5f));
+
+                    var rangeTextBuilder = new TextSettingsBuilder(rangeText)
+                                                .WithFontSize(10)
+                                                .WithFontStyle(TextStyle.ITALIC);
+                    excelService.RenderText(rangeTextBuilder);
+
+                    excelService.CurrentPos = (excelService.CurrentPos.row + 1, "Task");
                 }
-                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
             }
 
-            pdfService.Close();
-        }
-
-        private bool CurrentPageCanFitTaskGroup(TaskGroupAggregate aggregate, PDFService pdfService)
-        {
-            float height = 0;
-
-            // header
-            height += LINE_HEIGHT * 2;  // header line and space after
-
-            // tasks
-            foreach (var task in aggregate.Tasks)
-            {
-                height += LINE_HEIGHT * 2; // checkbox line, date line
-                height += LINE_HEIGHT / 2; // spacing after task
-            }
-
-            // spacing after group
-            height += LINE_HEIGHT;
-
-            return pdfService.CurrentPos.y + height <= pdfService.PDFMetadata.Dimensions.pageHeight;
+            excelService.RemoveWorksheet(ExcelService.DEFAULT_WORKSHEET);
+            excelService.Close();
         }
     }
-    */
 }
