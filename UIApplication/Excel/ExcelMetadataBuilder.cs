@@ -4,7 +4,7 @@
     {
         private string? destination;
         private int? rows;
-        private int? columns;
+        private string[]? columns;
 
         public ExcelMetadataBuilder WithDestination(string dest)
         {
@@ -12,9 +12,14 @@
             return this;
         }
 
-        public ExcelMetadataBuilder WithDimensions(int rows, int columns)
+        public ExcelMetadataBuilder WithRowsPerSheet(int rows)
         {
             this.rows = rows;
+            return this;
+        }
+
+        public ExcelMetadataBuilder WithColumns(string[] columns)
+        {
             this.columns = columns;
             return this;
         }
@@ -28,7 +33,7 @@
                 : new ExcelMetadata(
                 destination!,
                 rows.Value,
-                rows.Value
+                columns
             );
         }
     }
