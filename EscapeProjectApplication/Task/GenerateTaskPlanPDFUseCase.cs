@@ -1,8 +1,8 @@
 ﻿using BaseDomain;
 using EscapeProjectApplication.Output.PDF;
-using EscapeProjectApplication.UIElements.Checkbox;
-using EscapeProjectApplication.UIElements.Text;
 using EscapeProjectDomain;
+using UIDomain.Checkbox;
+using UIDomain.Text;
 
 namespace EscapeProjectApplication.Task
 {

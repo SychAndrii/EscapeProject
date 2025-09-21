@@ -1,6 +1,6 @@
-﻿using EscapeProjectApplication.UIElements.Text;
+﻿using UIDomain.Text;
 
-namespace EscapeProjectApplication.UIElements.Checkbox;
+namespace UIDomain.Checkbox;
 
 public class CheckboxSettings
 {

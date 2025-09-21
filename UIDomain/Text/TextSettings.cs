@@ -1,4 +1,4 @@
-﻿namespace EscapeProjectApplication.UIElements.Text
+﻿namespace UIDomain.Text
 {
     public class TextSettings
     {

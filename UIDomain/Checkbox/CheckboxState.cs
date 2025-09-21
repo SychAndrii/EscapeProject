@@ -1,4 +1,4 @@
-﻿namespace EscapeProjectApplication.UIElements.Checkbox
+﻿namespace UIDomain.Checkbox
 {
     public enum CheckboxState
     {

@@ -1,5 +1,5 @@
-﻿using EscapeProjectApplication.UIElements.Checkbox;
-using EscapeProjectApplication.UIElements.Text;
+﻿using UIDomain.Checkbox;
+using UIDomain.Text;
 
 namespace EscapeProjectApplication.Output.PDF
 {

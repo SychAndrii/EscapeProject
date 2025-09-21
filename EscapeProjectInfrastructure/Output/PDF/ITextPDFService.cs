@@ -1,6 +1,4 @@
 ﻿using EscapeProjectApplication.Output.PDF;
-using EscapeProjectApplication.UIElements.Checkbox;
-using EscapeProjectApplication.UIElements.Text;
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.IO.Font;
@@ -11,6 +9,8 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
 using iText.Layout;
 using iText.Layout.Element;
+using UIDomain.Checkbox;
+using UIDomain.Text;
 
 namespace EscapeProjectInfrastructure.Output.PDF
 {

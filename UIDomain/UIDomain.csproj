@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EscapeProjectDomain\EscapeProjectDomain.csproj" />
-    <ProjectReference Include="..\UIDomain\UIDomain.csproj" />
-  </ItemGroup>
-
 </Project>
