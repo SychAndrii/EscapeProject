@@ -11,7 +11,7 @@ namespace EscapeProjectPresentationCLI
             this.taskPlanUseCase = taskPlanUseCase;
         }
 
-        public async Task GenerateTaskPlanPDF()
+        public async Task GenerateTaskPlan()
         {
             await taskPlanUseCase.Execute();
         }

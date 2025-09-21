@@ -19,7 +19,7 @@ namespace EscapeProjectComposition
 
             GenerateTaskPlanUseCase useCase = new GenerateTaskPlanUseCase(taskGroupRepository, renderService);
             TasksController tasksController = new TasksController(useCase);
-            await tasksController.GenerateTaskPlanPDF();
+            await tasksController.GenerateTaskPlan();
         }
     }
 }
