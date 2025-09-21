@@ -3,12 +3,12 @@ using EscapeProjectDomain;
 
 namespace EscapeProjectApplication.UseCases
 {
-    public class GenerateTaskPlanPDFUseCase
+    public class GenerateTaskPlanUseCase
     {
         private readonly TaskGroupRepository taskGroupRepository;
         private readonly RenderService renderService;
 
-        public GenerateTaskPlanPDFUseCase(TaskGroupRepository taskGroupRepository, RenderService renderService)
+        public GenerateTaskPlanUseCase(TaskGroupRepository taskGroupRepository, RenderService renderService)
         {
             this.taskGroupRepository = taskGroupRepository;
             this.renderService = renderService;

@@ -4,9 +4,9 @@ namespace EscapeProjectPresentationCLI
 {
     public class TasksController
     {
-        private readonly GenerateTaskPlanPDFUseCase taskPlanUseCase;
+        private readonly GenerateTaskPlanUseCase taskPlanUseCase;
 
-        public TasksController(GenerateTaskPlanPDFUseCase taskPlanUseCase)
+        public TasksController(GenerateTaskPlanUseCase taskPlanUseCase)
         {
             this.taskPlanUseCase = taskPlanUseCase;
         }

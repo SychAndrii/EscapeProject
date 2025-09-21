@@ -17,7 +17,7 @@ namespace EscapeProjectComposition
             TaskGroupRepository taskGroupRepository = new JSONTaskGroupRepository("Task/tasks.json");
             RenderService renderService = new PDFRenderService(pdfServiceFactory);
 
-            GenerateTaskPlanPDFUseCase useCase = new GenerateTaskPlanPDFUseCase(taskGroupRepository, renderService);
+            GenerateTaskPlanUseCase useCase = new GenerateTaskPlanUseCase(taskGroupRepository, renderService);
             TasksController tasksController = new TasksController(useCase);
             await tasksController.GenerateTaskPlanPDF();
         }
