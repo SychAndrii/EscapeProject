@@ -1,0 +1,17 @@
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\EscapeProjectApplication.deps.json
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\EscapeProjectApplication.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\EscapeProjectApplication.pdb
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\BaseDomain.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\EscapeProjectDomain.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\EscapeProjectDomain.pdb
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\bin\Debug\net8.0\BaseDomain.pdb
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.csproj.AssemblyReference.cache
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.AssemblyInfoInputs.cache
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.AssemblyInfo.cs
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.csproj.CoreCompileInputs.cache
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapePr.FA03DD49.Up2Date
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\refint\EscapeProjectApplication.dll
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\EscapeProjectApplication.pdb
+C:\Users\andri\Desktop\Escape\EscapeProjectApplication\obj\Debug\net8.0\ref\EscapeProjectApplication.dll
