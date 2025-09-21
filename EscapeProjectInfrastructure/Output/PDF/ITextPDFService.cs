@@ -16,14 +16,21 @@ namespace EscapeProjectInfrastructure.Output.PDF
 {
     public class ITextPDFService : PDFService
     {
-        private Document? document;
-        private PdfPage? currentPage;
+#nullable disable
+        private Document document;
+        private PdfPage currentPage;
+#nullable enable
 
-        public ITextPDFService(float marginX, float marginY, float pageWidth, float pageHeight)
-            : base(marginX, marginY, pageWidth, pageHeight)
+        public ITextPDFService(PDFMetadataBuilder metadataBuilder)
+            : base(metadataBuilder)
         {
+            if (document == null || currentPage == null)
+            {
+                throw new Exception("Document and PdfPage objects were not set by the end of ITextPDFService creation");
+            }
         }
 
+        /* Render methods */
         public override void RenderCheckbox(CheckboxSettingsBuilder settingsBuilder)
         {
             if (document == null || currentPage == null)
@@ -60,8 +67,8 @@ namespace EscapeProjectInfrastructure.Output.PDF
 
                 float textCenter = CurrentPos.y + (checkboxSize / 2) - (textHeight / 2) + (descent * 2);
 
-                (float x, float y, int pageNumber) checkboxPos = CurrentPos;
-                CurrentPos = (CurrentPos.x + settings.Size + 5, textCenter, CurrentPos.pageNumber);
+                (float x, float y) checkboxPos = CurrentPos;
+                CurrentPos = (CurrentPos.x + settings.Size + 5, textCenter);
                 RenderText(settings.TextSettingsBuilder);
                 CurrentPos = checkboxPos;
             }
@@ -100,44 +107,7 @@ namespace EscapeProjectInfrastructure.Output.PDF
             }
         }
 
-        public override void Setup(string fileDestination)
-        {
-            PdfWriter pdfWriter = new PdfWriter(fileDestination);
-            PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-            pdfDocument.SetDefaultPageSize(new PageSize(Dimensions.pageWidth, Dimensions.pageHeight));
-
-            Document doc = new Document(pdfDocument);
-            doc.SetMargins(Margins.vertical, Margins.horizontal, Margins.vertical, Margins.vertical);
-            this.document = doc;
-
-            // Initialize with the first page
-            if (pdfDocument.GetNumberOfPages() == 0)
-            {
-                pdfDocument.AddNewPage();
-            }
-            currentPage = pdfDocument.GetPage(1);
-        }
-
-        public override int CreateNewPage(bool updateDimension = true)
-        {
-            if (document == null)
-            {
-                throw new InvalidOperationException("Document is not initialized. Call Setup() first.");
-            }
-
-            PdfDocument pdf = document.GetPdfDocument();
-            PdfPage newPage = pdf.AddNewPage();
-            currentPage = newPage;
-
-            if (updateDimension)
-            {
-                Dimensions = (Dimensions.pageWidth, Dimensions.pageHeight, Dimensions.pageAmount + 1);
-                CurrentPos = (Margins.horizontal, Margins.vertical, Dimensions.pageAmount);
-            }
-
-            return pdf.GetPageNumber(newPage);
-        }
-
+        /* IText helper methods */
         private PdfFont GetPdfFont(TextFont font)
         {
             return font == TextFont.HELVETICA
@@ -145,7 +115,30 @@ namespace EscapeProjectInfrastructure.Output.PDF
                 : throw new Exception($"{font} does not have corresponding font in ITextUIText");
         }
 
-        // ✅ Explicit cleanup
+        /* PDF document state manipulation methods */
+        protected override void OnMetadataSet()
+        {
+            PdfWriter pdfWriter = new PdfWriter(PDFMetadata.Destination);
+            PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+            pdfDocument.SetDefaultPageSize(new PageSize(PDFMetadata.Dimensions.pageWidth, PDFMetadata.Dimensions.pageHeight));
+
+            Document doc = new Document(pdfDocument);
+            doc.SetMargins(PDFMetadata.Margins.vertical, PDFMetadata.Margins.horizontal, PDFMetadata.Margins.vertical, PDFMetadata.Margins.vertical);
+            document = doc;
+        }
+
+        protected override void OnCurrentPageNumberChanged()
+        {
+            PdfDocument pdf = document.GetPdfDocument();
+            currentPage = pdf.GetPage(CurrentPageNumber);
+        }
+
+        protected override void OnNewPageCreated()
+        {
+            PdfDocument pdf = document.GetPdfDocument();
+            pdf.AddNewPage();
+        }
+
         public override void Close()
         {
             document?.Close();

@@ -4,9 +4,9 @@ namespace EscapeProjectInfrastructure.Output.PDF
 {
     public class ITextPDFServiceFactory : PDFServiceFactory
     {
-        public override PDFService Build()
+        public override PDFService Create(PDFMetadataBuilder metadataBuilder)
         {
-            return new ITextPDFService(marginX, marginY, pageWidth, pageHeight);
+            return new ITextPDFService(metadataBuilder);
         }
     }
 }

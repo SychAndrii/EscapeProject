@@ -21,10 +21,13 @@ namespace EscapeProjectApplication.Task
         public async ValueTask GeneratePlanPDF()
         {
             List<TaskGroupAggregate> taskGroups = await taskGroupRepository.GetTaskGroups();
+
+            PDFMetadataBuilder pdfMetadataBuilder = new PDFMetadataBuilder()
+                .WithDestination("file.pdf")
+                .WithDimensions(764, 825)
+                .WithMargins(25, 30);
             PDFService pdfService = pdfServiceFactory
-                .WithMargins(25, 30)
-                .WithPageSize(764, 825)
-                .Build();
+                .Create(pdfMetadataBuilder);
 
             foreach (TaskGroupAggregate taskGroup in taskGroups)
             {
@@ -34,6 +37,7 @@ namespace EscapeProjectApplication.Task
                 if (!CurrentPageCanFitTaskGroup(taskGroup, pdfService))
                 {
                     pdfService.CreateNewPage();
+                    pdfService.GoToPage(pdfService.TotalPages);
                 }
 
                 TextSettingsBuilder headerBuilder = new TextSettingsBuilder(taskGroupName);
@@ -42,7 +46,7 @@ namespace EscapeProjectApplication.Task
                     .WithFontSize(20);
                 pdfService.RenderText(headerBuilder);
 
-                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 2), pdfService.CurrentPos.pageNumber);
+                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 2));
 
                 foreach (TaskEntity task in tasksForGroup)
                 {
@@ -60,7 +64,7 @@ namespace EscapeProjectApplication.Task
                         .WithText(checkboxTextBuilder);
                     pdfService.RenderCheckbox(checkboxBuilder);
 
-                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT, pdfService.CurrentPos.pageNumber);
+                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
 
                     // Add the date/time line underneath (smaller font)
                     var rangeText = task.Duration();
@@ -71,9 +75,9 @@ namespace EscapeProjectApplication.Task
                             .WithFontStyle(TextStyle.ITALIC);
                         pdfService.RenderText(timeTextBuilder);
                     }
-                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT, pdfService.CurrentPos.pageNumber);
+                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
                 }
-                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT, pdfService.CurrentPos.pageNumber);
+                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
             }
 
             pdfService.Close();
@@ -96,7 +100,7 @@ namespace EscapeProjectApplication.Task
             // spacing after group
             height += LINE_HEIGHT;
 
-            return pdfService.CurrentPos.y + height <= pdfService.Dimensions.pageHeight;
+            return pdfService.CurrentPos.y + height <= pdfService.PDFMetadata.Dimensions.pageHeight;
         }
     }
 }

@@ -5,82 +5,87 @@ namespace EscapeProjectApplication.Output.PDF
 {
     public abstract class PDFService
     {
-        private const string DEST = "file.pdf";
-        private (float pageWidth, float pageHeight, int pageAmount) dimensions;
-        private (float x, float y, int pageNumber) currentPos;
-        private (float horizontal, float vertical) margins;
-
-        public (float horizontal, float vertical) Margins
+        /* PDF document state */
+        public PDFMetadata PDFMetadata
         {
-            get => margins;
+            get;
+        }
+
+        private int currentPageNumber;
+        public int CurrentPageNumber
+        {
+            get => currentPageNumber;
             private set
             {
-                if (value.horizontal < 0)
+                if (value <= 0 || value > TotalPages)
                 {
-                    throw new Exception($"Horizontal margin for PDF file must be >= 0");
+                    throw new Exception($"Current page number is out of range of PDF pages");
                 }
-                if (value.vertical < 0)
-                {
-                    throw new Exception($"Vertical margin for PDF file must be >= 0");
-                }
-                margins = value;
+                currentPageNumber = value;
             }
         }
 
-        public (float pageWidth, float pageHeight, int pageAmount) Dimensions
+        private int totalPages;
+        public int TotalPages
         {
-            get => dimensions;
-            set
+            get => totalPages;
+            private set
             {
-                if (value.pageWidth <= 0)
+                if (value <= 0)
                 {
-                    throw new Exception($"Width for PDF page must be > 0");
+                    throw new Exception($"Total page amount of PDF cannot be <= 0");
                 }
-                if (value.pageHeight <= 0)
-                {
-                    throw new Exception($"Height for PDF page must be > 0");
-                }
-                if (value.pageAmount <= 0)
-                {
-                    throw new Exception($"Number of pages for PDF page must be > 0");
-                }
-                dimensions = value;
+                totalPages = value;
             }
         }
 
-        public (float x, float y, int pageNumber) CurrentPos
+        private (float x, float y) currentPos;
+
+        public (float x, float y) CurrentPos
         {
             get => currentPos;
             set
             {
-                if (value.x < 0 || value.x > dimensions.pageWidth)
+                if (value.x < 0 || value.x > PDFMetadata.Dimensions.pageWidth)
                 {
                     throw new Exception("Page X coordinate in PDF document is out of bounds");
                 }
-                if (value.y < 0 || value.y > dimensions.pageHeight)
+                if (value.y < 0 || value.y > PDFMetadata.Dimensions.pageHeight)
                 {
                     throw new Exception("Page Y coordinate in PDF document is out of bounds");
-                }
-                if (value.pageNumber <= 0 || value.pageNumber > Dimensions.pageAmount)
-                {
-                    throw new Exception("Page number coordinate in PDF document is out of bounds");
                 }
                 currentPos = value;
             }
         }
 
-        protected PDFService(float marginX, float marginY, float pageWidth, float pageHeight)
+        protected PDFService(PDFMetadataBuilder metadataBuilder)
         {
-            Margins = (marginX, marginY);
-            Dimensions = (pageWidth, pageHeight, 1);
-            CurrentPos = (0, 0, 1);
-            Setup(DEST);
+            PDFMetadata = metadataBuilder.Build();
+            OnMetadataSet();
+            CreateNewPage();
+            GoToPage(totalPages);
         }
 
+        /* Render methods */
         public abstract void RenderText(TextSettingsBuilder settingsBuilder);
         public abstract void RenderCheckbox(CheckboxSettingsBuilder settingsBuilder);
-        public abstract int CreateNewPage(bool updateDimensions = true);
-        public abstract void Setup(string fileDestination);
+
+        /* PDF document state manipulation methods */
+        public void GoToPage(int pageNumber)
+        {
+            CurrentPageNumber = pageNumber;
+            CurrentPos = (0, 0);
+            OnCurrentPageNumberChanged();
+        }
+        public void CreateNewPage()
+        {
+            TotalPages++;
+            OnNewPageCreated();
+        }
+
+        protected abstract void OnCurrentPageNumberChanged();
+        protected abstract void OnNewPageCreated();
+        protected abstract void OnMetadataSet();
         public abstract void Close();
     }
 }
