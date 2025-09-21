@@ -55,14 +55,9 @@ namespace UIInfrastructure.Excel
             string colName = GetExcelColumnName(colIndex);
             string cellRef = $"{colName}{CurrentPos.row}";
 
-            Cell cell = new Cell
-            {
-                CellReference = cellRef,
-                DataType = CellValues.String,
-                CellValue = new CellValue(checkboxChar)
-            };
-
-            row.Append(cell);
+            Cell cell = InsertCell(row, cellRef);
+            cell.DataType = CellValues.String;
+            cell.CellValue = new CellValue(checkboxChar);
             wsPart.Worksheet.Save();
         }
 
@@ -97,19 +92,15 @@ namespace UIInfrastructure.Excel
             string colName = GetExcelColumnName(colIndex);
             string cellRef = $"{colName}{CurrentPos.row}";
 
-            Cell cell = new Cell
-            {
-                CellReference = cellRef,
-                DataType = CellValues.String,
-                CellValue = new CellValue(text)
-            };
-
-            row.Append(cell);
+            Cell cell = InsertCell(row, cellRef);
+            cell.DataType = CellValues.String;
+            cell.CellValue = new CellValue(text);
             wsPart.Worksheet.Save();
         }
 
         protected override void OnCurrentWorksheetChanged()
         {
+            CurrentPos = (2, ExcelMetadata.Columns[0]);
             currentSheet = workbookPart.Workbook.Sheets
                 .Elements<Sheet>()
                 .FirstOrDefault(s => s.Name == CurrentWorksheet);
@@ -184,6 +175,32 @@ namespace UIInfrastructure.Excel
 
             // 5. Save changes to the workbook
             workbookPart.Workbook.Save();
+        }
+
+        private Cell InsertCell(Row row, string cellReference)
+        {
+            // Try to find existing cell
+            Cell cell = row.Elements<Cell>()
+                           .FirstOrDefault(c => c.CellReference?.Value == cellReference);
+            if (cell != null)
+            {
+                return cell;
+            }
+
+            // Create new cell
+            Cell refCell = null;
+            foreach (Cell c in row.Elements<Cell>())
+            {
+                if (string.Compare(c.CellReference.Value, cellReference, true) > 0)
+                {
+                    refCell = c;
+                    break;
+                }
+            }
+
+            Cell newCell = new Cell { CellReference = cellReference };
+            row.InsertBefore(newCell, refCell);
+            return newCell;
         }
 
         private string GetExcelColumnName(int columnNumber)
