@@ -23,7 +23,7 @@ namespace UIApplication.Excel
                 {
                     throw new Exception($"Cannot switch to worksheet [{value}] because it does not exist");
                 }
-                CurrentWorksheet = value;
+                currentWorksheet = value;
             }
         }
 

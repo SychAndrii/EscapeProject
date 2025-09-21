@@ -4,7 +4,9 @@ using EscapeProjectDomain;
 using EscapeProjectInfrastructure.Render;
 using EscapeProjectInfrastructure.Task;
 using EscapeProjectPresentationCLI;
+using UIApplication.Excel;
 using UIApplication.PDF;
+using UIInfrastructure.Excel;
 using UIInfrastructure.PDF;
 
 namespace EscapeProjectComposition
@@ -13,13 +15,19 @@ namespace EscapeProjectComposition
     {
         private static async Task Main(string[] args)
         {
-            PDFServiceFactory pdfServiceFactory = new ITextPDFServiceFactory();
             TaskGroupRepository taskGroupRepository = new JSONTaskGroupRepository("Task/tasks.json");
-            RenderService renderService = new PDFRenderService(pdfServiceFactory);
 
-            GenerateTaskPlanUseCase useCase = new GenerateTaskPlanUseCase(taskGroupRepository, renderService);
-            TasksController tasksController = new TasksController(useCase);
-            await tasksController.GenerateTaskPlan();
+            PDFServiceFactory pdfServiceFactory = new ITextPDFServiceFactory();
+            RenderService renderServicePDF = new PDFRenderService(pdfServiceFactory);
+            GenerateTaskPlanUseCase useCasePDF = new GenerateTaskPlanUseCase(taskGroupRepository, renderServicePDF);
+            TasksController tasksControllerPDF = new TasksController(useCasePDF);
+            await tasksControllerPDF.GenerateTaskPlan();
+
+            ExcelServiceFactory excelServiceFactory = new OpenXMLExcelServiceFactory();
+            RenderService renderServiceExcel = new ExcelRenderService(excelServiceFactory);
+            GenerateTaskPlanUseCase useCaseExcel = new GenerateTaskPlanUseCase(taskGroupRepository, renderServiceExcel);
+            TasksController tasksControllerExcel = new TasksController(useCaseExcel);
+            await tasksControllerExcel.GenerateTaskPlan();
         }
     }
 }
