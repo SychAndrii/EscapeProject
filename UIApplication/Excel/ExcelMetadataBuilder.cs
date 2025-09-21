@@ -4,7 +4,7 @@
     {
         private string? destination;
         private int? rows;
-        private string[]? columns;
+        private List<string>? columns;
 
         public ExcelMetadataBuilder WithDestination(string dest)
         {
@@ -18,7 +18,7 @@
             return this;
         }
 
-        public ExcelMetadataBuilder WithColumns(string[] columns)
+        public ExcelMetadataBuilder WithColumns(List<string> columns)
         {
             this.columns = columns;
             return this;
