@@ -42,7 +42,7 @@ namespace UIInfrastructure.PDF
             PdfDocument pdf = document.GetPdfDocument();
             PdfAcroForm form = PdfAcroForm.GetAcroForm(pdf, true);
 
-            Rectangle rect = new Rectangle(CurrentPos.x, CurrentPos.y, settings.Size, settings.Size);
+            Rectangle rect = new Rectangle(CurrentPos.x + PDFMetadata.Margins.horizontal, PDFMetadata.Dimensions.pageHeight - CurrentPos.y - PDFMetadata.Margins.vertical, settings.Size, settings.Size);
             PdfButtonFormField checkbox = PdfFormField.CreateCheckBox(
                 pdf,
                 rect,
@@ -65,7 +65,7 @@ namespace UIInfrastructure.PDF
                 float descent = font.GetDescent("g", fontSize);
                 float textHeight = ascent - descent;
 
-                float textCenter = CurrentPos.y + (checkboxSize / 2) - (textHeight / 2) + (descent * 2);
+                float textCenter = CurrentPos.y - (checkboxSize / 2) + (textHeight / 2) - (descent * 2);
 
                 (float x, float y) checkboxPos = CurrentPos;
                 CurrentPos = (CurrentPos.x + settings.Size + 5, textCenter);
@@ -96,7 +96,7 @@ namespace UIInfrastructure.PDF
                     .SetStrokeWidth(settings.FontWeight == TextWeight.BOLD ? .5f : 0f)
                     .SetStrokeColor(DeviceGray.BLACK)
                     .SetFontSize(settings.FontSize)
-                    .SetFixedPosition(CurrentPos.x, CurrentPos.y, textWidth + 10);
+                    .SetFixedPosition(CurrentPos.x + PDFMetadata.Margins.horizontal, PDFMetadata.Dimensions.pageHeight - CurrentPos.y - PDFMetadata.Margins.vertical, textWidth + 10);
 
                 if (settings.FontStyle == TextStyle.ITALIC)
                 {

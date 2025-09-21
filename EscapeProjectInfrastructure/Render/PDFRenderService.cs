@@ -22,7 +22,7 @@ namespace EscapeProjectInfrastructure.Render
             PDFMetadataBuilder pdfMetadataBuilder = new PDFMetadataBuilder()
                 .WithDestination("file.pdf")
                 .WithDimensions(764, 825)
-                .WithMargins(25, 30);
+                .WithMargins(25, 50);
             PDFService pdfService = pdfServiceFactory
                 .Create(pdfMetadataBuilder);
 
@@ -43,7 +43,7 @@ namespace EscapeProjectInfrastructure.Render
                     .WithFontSize(20);
                 pdfService.RenderText(headerBuilder);
 
-                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 2));
+                pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 1.5f));
 
                 foreach (TaskEntity task in tasksForGroup)
                 {
@@ -64,7 +64,7 @@ namespace EscapeProjectInfrastructure.Render
                     pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
 
                     // Add the date/time line underneath (smaller font)
-                    var rangeText = task.Duration();
+                    var rangeText = task.Range();
                     if (rangeText != null)
                     {
                         var timeTextBuilder = new TextSettingsBuilder(rangeText)
@@ -72,7 +72,7 @@ namespace EscapeProjectInfrastructure.Render
                             .WithFontStyle(TextStyle.ITALIC);
                         pdfService.RenderText(timeTextBuilder);
                     }
-                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
+                    pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + (LINE_HEIGHT * 1.5f));
                 }
                 pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
             }
