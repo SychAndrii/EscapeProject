@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EscapeProjectPresentationCLI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+adbd355d89c388f98fb95e29e0447c989612ac38")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8e60ffc53ad0456c509442a85c1b01bc25174599")]
 [assembly: System.Reflection.AssemblyProductAttribute("EscapeProjectPresentationCLI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EscapeProjectPresentationCLI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
