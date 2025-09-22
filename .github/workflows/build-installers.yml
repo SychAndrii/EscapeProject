@@ -54,23 +54,31 @@ jobs:
           sudo mv appimagetool /usr/local/bin/
       - name: Publish self-contained for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
-      - name: Package as AppImage (with libgdiplus)
+      - name: Package as AppImage (with libgdiplus, FUSE workaround)
         run: |
           mkdir -p AppDir/usr/bin
           cp -r publish/linux/* AppDir/usr/bin/
-          cp /usr/lib/x86_64-linux-gnu/libgdiplus.so* AppDir/usr/bin/ || true
+
+          # Copy libgdiplus wherever it is
+          find /usr/lib -name "libgdiplus.so*" -exec cp {} AppDir/usr/bin/ \; || true
+
+          # Minimal .desktop file
           echo '[Desktop Entry]
           Name=Escape Project
           Exec=EscapeProjectComposition
           Icon=escape-project
           Type=Application
           Categories=Utility;' > AppDir/escape-project.desktop
+
           touch AppDir/escape-project.png
-          appimagetool AppDir EscapeProject-x86_64.AppImage
+
+          # Extract appimagetool (avoid FUSE issue)
+          appimagetool --appimage-extract
+          ./squashfs-root/AppRun AppDir EscapeProject-x86_64.AppImage
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
-          name: linux-appimage
+          name: linux-installer
           path: EscapeProject-x86_64.AppImage
 
   # macOS Build
@@ -100,7 +108,7 @@ jobs:
       - name: Upload macOS builds
         uses: actions/upload-artifact@v4
         with:
-          name: macos-dmg
+          name: macos-installer
           path: |
             EscapeProject-x64.dmg
             EscapeProject-arm64.dmg
