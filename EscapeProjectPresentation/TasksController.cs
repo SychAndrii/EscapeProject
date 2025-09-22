@@ -4,14 +4,14 @@ namespace EscapeProjectPresentationCLI
 {
     public class TasksController
     {
-        private readonly GenerateTaskPlanPDFUseCase taskPlanUseCase;
+        private readonly GenerateTaskPlanUseCase taskPlanUseCase;
 
-        public TasksController(GenerateTaskPlanPDFUseCase taskPlanUseCase)
+        public TasksController(GenerateTaskPlanUseCase taskPlanUseCase)
         {
             this.taskPlanUseCase = taskPlanUseCase;
         }
 
-        public async Task GenerateTaskPlanPDF()
+        public async Task GenerateTaskPlan()
         {
             await taskPlanUseCase.Execute();
         }
