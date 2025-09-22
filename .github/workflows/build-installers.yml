@@ -27,30 +27,15 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Publish self-contained for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained true -o publish/win
+      - name: Publish self-contained single-file for Windows
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win
 
       - name: Test Windows binary
         run: |
           cd publish/win
           ./EscapeProjectComposition.exe --help
 
-      - name: Create Windows installer script
-        run: |
-          @"
-          @echo off
-          echo ==^> Installing Escape Project...
-          echo (no dependencies required on Windows)
-
-          echo.
-          echo ✅ Installation complete!
-          echo To run the program, execute:
-          echo   EscapeProjectComposition.exe --help
-          echo.
-          pause
-          "@ | Out-File -FilePath publish/win/install-escape.bat -Encoding ascii
-
-      - name: Bundle Windows build + script
+      - name: Bundle Windows build
         run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
 
       - name: Upload Windows build
