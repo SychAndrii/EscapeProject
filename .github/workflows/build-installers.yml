@@ -128,10 +128,20 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Install libgdiplus
+        run: brew install mono-libgdiplus
+
       - name: Publish self-contained for macOS (Intel + Apple Silicon)
         run: |
           dotnet publish -c Release -r osx-x64 --self-contained true -o publish/macos-x64
           dotnet publish -c Release -r osx-arm64 --self-contained true -o publish/macos-arm64
+
+      - name: Copy libgdiplus into output
+        run: |
+          cp /opt/homebrew/lib/libgdiplus*.dylib publish/macos-x64/ || true
+          cp /opt/homebrew/lib/libgdiplus*.dylib publish/macos-arm64/ || true
+
       - name: Create DMG (x64)
         run: |
           mkdir dmg-x64
@@ -142,12 +152,14 @@ jobs:
           mkdir dmg-arm64
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
+
       - name: Test macOS binary
         run: |
           mkdir -p /tmp/mnt-x64
           hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
           /tmp/mnt-x64/EscapeProjectComposition --help
           hdiutil detach /tmp/mnt-x64
+
       - name: Bundle macOS builds
         run: zip macos-installer.zip EscapeProject-x64.dmg EscapeProject-arm64.dmg
       - name: Upload macOS builds
