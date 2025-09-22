@@ -5,101 +5,95 @@ on:
     branches: [ "workflow/installers" ]
 
 jobs:
-  # Windows Build
-  build-windows:
-    runs-on: windows-latest
+  # Shared build check
+  build-check:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - name: Restore and build (no publish yet)
+        run: dotnet build --configuration Release
 
+  # Windows Build
+  build-windows:
+    needs: build-check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
       - name: Publish self-contained for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained true -o publish/win
-
       - name: Upload Windows build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-installer
           path: publish/win/**
 
   # Linux Build
   build-linux:
+    needs: build-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
       - name: Install native deps
         run: sudo apt-get update && sudo apt-get install -y libgdiplus appimagetool
-
       - name: Publish self-contained for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
-
       - name: Package as AppImage (with libgdiplus)
         run: |
           mkdir -p AppDir/usr/bin
           cp -r publish/linux/* AppDir/usr/bin/
-
-          # Copy libgdiplus into AppImage for portability
           cp /usr/lib/x86_64-linux-gnu/libgdiplus.so* AppDir/usr/bin/ || true
-
-          # Minimal .desktop file
           echo '[Desktop Entry]
           Name=Escape Project
           Exec=EscapeProjectComposition
           Icon=escape-project
           Type=Application
           Categories=Utility;' > AppDir/escape-project.desktop
-
-          # Dummy icon
           touch AppDir/escape-project.png
-
-          # Build AppImage
           appimagetool AppDir EscapeProject-x86_64.AppImage
-
       - name: Upload Linux build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-appimage
           path: EscapeProject-x86_64.AppImage
 
   # macOS Build
   build-macos:
+    needs: build-check
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
       - name: Publish self-contained for macOS (Intel + Apple Silicon)
         run: |
           dotnet publish -c Release -r osx-x64 --self-contained true -o publish/macos-x64
           dotnet publish -c Release -r osx-arm64 --self-contained true -o publish/macos-arm64
-
       - name: Create DMG (x64)
         run: |
           mkdir dmg-x64
           cp -r publish/macos-x64/* dmg-x64/
           hdiutil create EscapeProject-x64.dmg -srcfolder dmg-x64 -ov -format UDZO
-
       - name: Create DMG (arm64)
         run: |
           mkdir dmg-arm64
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
-
       - name: Upload macOS builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
           path: |
