@@ -124,6 +124,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -146,13 +147,40 @@ jobs:
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
 
-      # Create macOS installer script
+      - name: Install libgdiplus (brew) and fix symlink
+        run: |
+          brew install mono-libgdiplus
+          # Ensure /usr/local/lib exists
+          sudo mkdir -p /usr/local/lib
+          # Find libgdiplus.dylib from brew prefix and link it
+          LIBGDIPLUS=$(brew --prefix mono-libgdiplus)/lib/libgdiplus.dylib
+          echo "Found libgdiplus at: $LIBGDIPLUS"
+          if [ -f "$LIBGDIPLUS" ]; then
+            sudo ln -sf "$LIBGDIPLUS" /usr/local/lib/libgdiplus.dylib
+          else
+            echo "ERROR: libgdiplus not found in brew prefix"
+            exit 1
+          fi
+
+      - name: Test x64 DMG
+        run: |
+          mkdir -p /tmp/mnt-x64
+          hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
+          /tmp/mnt-x64/EscapeProjectComposition --help
+          hdiutil detach /tmp/mnt-x64
+
+      - name: Test arm64 DMG
+        run: |
+          mkdir -p /tmp/mnt-arm64
+          hdiutil attach EscapeProject-arm64.dmg -mountpoint /tmp/mnt-arm64
+          /tmp/mnt-arm64/EscapeProjectComposition --help
+          hdiutil detach /tmp/mnt-arm64
+
       - name: Create macOS installer script
         run: |
           cat << 'EOF' > install-escape-macos.sh
           #!/bin/bash
           set -e
-
           echo "==> Installing required system libraries (libgdiplus)..."
 
           # Install Homebrew if missing
@@ -161,21 +189,17 @@ jobs:
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           fi
 
+          # Detect architecture
           ARCH=$(uname -m)
 
-          # Always install arm64 libgdiplus (native on Apple Silicon, also works on Intel)
           brew install mono-libgdiplus || true
 
-          # If on Apple Silicon, install x86_64 version for Rosetta
           if [ "$ARCH" = "arm64" ]; then
             echo "Detected Apple Silicon. Installing x86_64 libgdiplus via Rosetta..."
             arch -x86_64 brew install mono-libgdiplus || true
           fi
 
-          # Ensure /usr/local/lib exists
           sudo mkdir -p /usr/local/lib
-
-          # Try to symlink from both possible brew prefixes
           for path in "$(brew --prefix mono-libgdiplus)/lib" "/usr/local/homebrew/lib"; do
             if [ -f "$path/libgdiplus.dylib" ]; then
               sudo ln -sf "$path/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
@@ -185,12 +209,11 @@ jobs:
 
           echo ""
           echo "✅ Installation complete!"
-          echo "Now open the Escape Project DMG, drag it to Applications, and run it."
+          echo "Now you can open the Escape Project DMG, drag it to Applications, and run it."
           EOF
 
           chmod +x install-escape-macos.sh
 
-      # Upload macOS builds + installer script
       - name: Upload macOS builds
         uses: actions/upload-artifact@v4
         with:
@@ -199,32 +222,3 @@ jobs:
             EscapeProject-x64.dmg
             EscapeProject-arm64.dmg
             install-escape-macos.sh
-
-      # Setup libgdiplus on CI for testing both architectures
-      - name: Setup libgdiplus for CI test
-        run: |
-          brew install mono-libgdiplus
-          arch -x86_64 brew install mono-libgdiplus || true
-          sudo mkdir -p /usr/local/lib
-
-          for path in "$(brew --prefix mono-libgdiplus)/lib" "/usr/local/homebrew/lib"; do
-            if [ -f "$path/libgdiplus.dylib" ]; then
-              sudo ln -sf "$path/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
-            fi
-          done
-
-      # Test Intel build
-      - name: Test macOS binary (x64 build)
-        run: |
-          mkdir -p /tmp/mnt-x64
-          hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
-          /tmp/mnt-x64/EscapeProjectComposition --help || true
-          hdiutil detach /tmp/mnt-x64 -force || true
-
-      # Test ARM build
-      - name: Test macOS binary (arm64 build)
-        run: |
-          mkdir -p /tmp/mnt-arm64
-          hdiutil attach EscapeProject-arm64.dmg -mountpoint /tmp/mnt-arm64
-          /tmp/mnt-arm64/EscapeProjectComposition --help || true
-          hdiutil detach /tmp/mnt-arm64 -force || true
