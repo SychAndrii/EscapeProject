@@ -45,8 +45,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Install native deps
-        run: sudo apt-get update && sudo apt-get install -y libgdiplus appimagetool
+      - name: Install native deps (libgdiplus + appimagetool)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdiplus
+          wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/
       - name: Publish self-contained for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
       - name: Package as AppImage (with libgdiplus)
