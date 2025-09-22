@@ -50,7 +50,7 @@ jobs:
       - name: Install native deps (libgdiplus + appimagetool)
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgdiplus libfuse2
+          sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
           wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
@@ -95,7 +95,7 @@ jobs:
           echo "==> Installing required system libraries..."
           if command -v apt-get >/dev/null 2>&1; then
             sudo apt-get update
-            sudo apt-get install -y libgdiplus libfuse2
+            sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
           elif command -v yum >/dev/null 2>&1; then
             sudo yum install -y libgdiplus fuse
           elif command -v pacman >/dev/null 2>&1; then
@@ -105,22 +105,27 @@ jobs:
             exit 1
           fi
 
-          echo "==> Downloading latest Escape Project AppImage..."
-          APP=EscapeProject-x86_64.AppImage
-          wget -O "$APP" https://github.com/<your-username>/<your-repo>/releases/latest/download/$APP
-          chmod +x "$APP"
-
           echo "==> Running Escape Project..."
+          APP=EscapeProject-x86_64.AppImage
+          if [ ! -f "$APP" ]; then
+            echo "AppImage not found in current folder."
+            echo "Please place $APP next to this script and run again."
+            exit 1
+          fi
+
+          chmod +x "$APP"
           exec "./$APP"
           EOF
 
           chmod +x install-escape.sh
 
-      - name: Upload Linux installer script
+      - name: Upload Linux build + installer script
         uses: actions/upload-artifact@v4
         with:
           name: linux-installer
-          path: install-escape.sh
+          path: |
+            EscapeProject-x86_64.AppImage
+            install-escape.sh
 
   # macOS Build
   build-macos:
