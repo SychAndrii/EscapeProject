@@ -117,7 +117,8 @@ jobs:
         with:
           name: linux-installer
           path: linux-installer.zip
-
+ 
+  # MacOS Build
   build-macos-installer:
     needs: build-app
     runs-on: macos-latest
@@ -162,6 +163,11 @@ jobs:
           # Install libgdiplus (for System.Drawing)
           brew install mono-libgdiplus
 
+          # Ensure symlink exists so .NET can find libgdiplus
+          LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
+          echo "==> Linking libgdiplus into /usr/local/lib..."
+          sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+
           echo "✅ Dependencies installed."
 
           # Copy app into /Applications (optional)
@@ -187,6 +193,8 @@ jobs:
       - name: Test macOS binary (x64 build)
         run: |
           brew install mono-libgdiplus
+          LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
+          sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
           mkdir -p /tmp/mnt-x64
           hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
           /tmp/mnt-x64/EscapeProjectComposition --help
