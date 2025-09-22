@@ -41,7 +41,7 @@ jobs:
       - name: Test Windows binary
         run: |
           cd publish/win
-          ./escapeproject.bat --help
+          cmd.exe /c escapeproject.bat --help
 
       - name: Bundle Windows build
         run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
@@ -115,7 +115,7 @@ jobs:
 
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-          # ensure Task folder exists (copy is done at bundle stage)
+          # ensure Task folder exists (copied at bundle stage)
           if [ ! -d "$SCRIPT_DIR/Task" ]; then
             mkdir -p "$SCRIPT_DIR/Task"
           fi
@@ -132,6 +132,11 @@ jobs:
           echo "Run with: ./EscapeProject-x86_64.AppImage"
           EOF
           chmod +x install-escape.sh
+
+      - name: Test Linux AppImage
+        run: |
+          chmod +x EscapeProject-x86_64.AppImage
+          ./EscapeProject-x86_64.AppImage --help
 
       - name: Bundle Linux AppImage + script + config + Task folder
         run: |
