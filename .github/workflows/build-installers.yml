@@ -9,19 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Restore and build (no publish yet)
         run: dotnet build --configuration Release
 
-  # Windows Build
   windows-build:
     needs: app-build
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -52,12 +54,12 @@ jobs:
           name: windows-installer
           path: windows-installer.zip
 
-  # Linux Build
   linux-build:
     needs: app-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -74,11 +76,16 @@ jobs:
       - name: Publish self-contained for Linux
         run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r linux-x64 --self-contained true -o publish/linux
 
+      - name: Copy config and tasks into publish output
+        run: |
+          mkdir -p publish/linux/Task
+          cp EscapeProjectComposition/config.json publish/linux/config.json
+          cp EscapeProjectInfrastructure/Task/tasks.json publish/linux/Task/tasks.json
+
       - name: Package as AppImage
         run: |
           mkdir -p AppDir/usr/bin
-          # copy only binaries into AppImage (exclude Task + TaskPlans)
-          rsync -av --exclude 'Task' --exclude 'TaskPlans' publish/linux/ AppDir/usr/bin/
+          rsync -av publish/linux/ AppDir/usr/bin/
           ln -s /lib/x86_64-linux-gnu/libdl.so.2 AppDir/usr/bin/libdl.so || true
           echo '#!/bin/sh
           HERE=$(dirname "$(readlink -f "$0")")
@@ -115,21 +122,23 @@ jobs:
 
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-          # validate Task folder and tasks.json
-          if [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
-            echo "❌ ERROR: Task/tasks.json is missing! Package is corrupted."
-            exit 1
+          if [ ! -f "$SCRIPT_DIR/config.json" ] || [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+            echo "⚠️  Extracting files from AppImage..."
+            mkdir -p "$SCRIPT_DIR/Task"
+            "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" --appimage-extract > /dev/null
+
+            if [ ! -f "$SCRIPT_DIR/config.json" ]; then
+              cp squashfs-root/usr/bin/config.json "$SCRIPT_DIR/config.json"
+            fi
+
+            if [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+              cp squashfs-root/usr/bin/Task/tasks.json "$SCRIPT_DIR/Task/tasks.json"
+            fi
+
+            rm -rf squashfs-root
           fi
 
-          # validate config.json
-          if [ ! -f "$SCRIPT_DIR/config.json" ]; then
-            echo "❌ ERROR: config.json is missing! Package is corrupted."
-            exit 1
-          fi
-
-          # export config path
           export EscapeProjectAbsoluteConfigPath="$SCRIPT_DIR/config.json"
-
           echo "✅ Environment ready. Starting app..."
           "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
           EOF
@@ -140,12 +149,8 @@ jobs:
           chmod +x EscapeProject-x86_64.AppImage
           ./escape-run.sh --help
 
-      - name: Bundle Linux AppImage + launcher + config + Task folder
-        run: |
-          mkdir -p Task
-          cp EscapeProjectInfrastructure/Task/tasks.json Task/tasks.json   # copy from repo
-          echo '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }' > config.json
-          zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh Task config.json
+      - name: Bundle Linux installer
+        run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh
 
       - name: Upload Linux installer bundle
         uses: actions/upload-artifact@v4
