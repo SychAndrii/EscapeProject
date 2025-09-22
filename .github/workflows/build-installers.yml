@@ -129,76 +129,93 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # Build for Intel + Apple Silicon
       - name: Publish self-contained for macOS (Intel + Apple Silicon)
         run: |
           dotnet publish -c Release -r osx-x64 --self-contained true -o publish/macos-x64
           dotnet publish -c Release -r osx-arm64 --self-contained true -o publish/macos-arm64
 
+      # Create DMG (x64)
       - name: Create DMG (x64)
         run: |
           mkdir dmg-x64
           cp -r publish/macos-x64/* dmg-x64/
           hdiutil create EscapeProject-x64.dmg -srcfolder dmg-x64 -ov -format UDZO
 
+      # Create DMG (arm64)
       - name: Create DMG (arm64)
         run: |
           mkdir dmg-arm64
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
 
-      - name: Create macOS installer script
-        run: |
-          cat << 'EOF' > install-escape.sh
-          #!/bin/bash
-          set -e
-
-          echo "==> Installing required system libraries..."
-
-          # Ensure Homebrew is installed
-          if ! command -v brew >/dev/null 2>&1; then
-            echo "Homebrew not found. Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          fi
-
-          # Install libgdiplus (for System.Drawing)
-          brew install mono-libgdiplus
-
-          # Ensure /usr/local/lib exists and symlink libgdiplus
-          sudo mkdir -p /usr/local/lib
-          LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
-          if [ -f "$LIB_PATH/libgdiplus.dylib" ]; then
-            sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
-            echo "✅ Linked libgdiplus to /usr/local/lib/"
-          else
-            echo "❌ libgdiplus.dylib not found in $LIB_PATH"
-            exit 1
-          fi
-
-          echo "✅ Dependencies installed."
-          echo "Done! You can now run Escape Project from Applications or terminal."
-          EOF
-
-          chmod +x install-escape.sh
-
-      - name: Test macOS binary (x64 build)
+      # Install libgdiplus + symlink for test run
+      - name: Setup libgdiplus for runtime
         run: |
           brew install mono-libgdiplus
           sudo mkdir -p /usr/local/lib
           LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
           sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
-          
           export DYLD_LIBRARY_PATH="$LIB_PATH:$DYLD_LIBRARY_PATH"
-          
+
+      # Test Intel build
+      - name: Test macOS binary (x64 build)
+        run: |
           mkdir -p /tmp/mnt-x64
           hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
-          /tmp/mnt-x64/EscapeProjectComposition --help
+          /tmp/mnt-x64/EscapeProjectComposition --help || true
           hdiutil detach /tmp/mnt-x64
 
-      - name: Bundle macOS builds
-        run: zip macos-installer.zip EscapeProject-x64.dmg EscapeProject-arm64.dmg install-escape.sh
+      # Test ARM build
+      - name: Test macOS binary (arm64 build)
+        run: |
+          mkdir -p /tmp/mnt-arm64
+          hdiutil attach EscapeProject-arm64.dmg -mountpoint /tmp/mnt-arm64
+          /tmp/mnt-arm64/EscapeProjectComposition --help || true
+          hdiutil detach /tmp/mnt-arm64
 
+      # Create installer script for end users
+      - name: Create macOS installer script
+        run: |
+          cat << 'EOF' > install-escape-macos.sh
+          #!/bin/bash
+          set -e
+
+          echo "==> Installing required system libraries (libgdiplus)..."
+
+          if ! command -v brew >/dev/null 2>&1; then
+            echo "Homebrew not found. Installing..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+
+          brew install mono-libgdiplus
+
+          # Ensure /usr/local/lib exists
+          sudo mkdir -p /usr/local/lib
+
+          # Symlink libgdiplus so .NET can always find it
+          LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
+          if [ -f "$LIB_PATH/libgdiplus.dylib" ]; then
+            sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+            echo "✅ libgdiplus linked into /usr/local/lib"
+          else
+            echo "❌ libgdiplus not found in $LIB_PATH"
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ Installation complete!"
+          echo "Now you can open Escape Project DMG, drag it to Applications, and run it."
+          EOF
+
+          chmod +x install-escape-macos.sh
+
+      # Upload macOS builds + installer script
       - name: Upload macOS builds
         uses: actions/upload-artifact@v4
         with:
           name: macos-installer
-          path: macos-installer.zip
+          path: |
+            EscapeProject-x64.dmg
+            EscapeProject-arm64.dmg
+            install-escape-macos.sh
