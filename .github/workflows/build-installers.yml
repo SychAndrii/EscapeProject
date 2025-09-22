@@ -5,7 +5,7 @@ on:
     branches: [ "workflow/installers" ]
 
 jobs:
-  build-app:
+  app-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +17,7 @@ jobs:
         run: dotnet build --configuration Release
 
   # Windows Build
-  build-windows-installer:
+  windows-build:
     needs: build-app
     runs-on: windows-latest
     steps:
@@ -28,7 +28,7 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Publish self-contained single-file for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win
+        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win
 
       - name: Test Windows binary
         run: |
@@ -45,7 +45,7 @@ jobs:
           path: windows-installer.zip
 
   # Linux Build
-  build-linux-installer:
+  linux-build:
     needs: build-app
     runs-on: ubuntu-latest
     steps:
