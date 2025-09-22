@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "EscapeProjectComposition": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "EscapeProjectAbsoluteConfigPath": "C:\\Users\\andri\\Desktop\\Escape\\EscapeProjectComposition\\bin\\Debug\\net8.0\\config.json"
+      }
+    }
+  }
+}

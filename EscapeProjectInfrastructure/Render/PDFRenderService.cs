@@ -1,6 +1,7 @@
 ﻿using BaseDomain;
 using EscapeProjectApplication.Services;
 using EscapeProjectDomain;
+using EscapeProjectInfrastructure.Configuration;
 using UIApplication.PDF;
 using UIDomain.Checkbox;
 using UIDomain.Text;
@@ -10,21 +11,26 @@ namespace EscapeProjectInfrastructure.Render
     public class PDFRenderService : RenderService
     {
         private readonly PDFServiceFactory pdfServiceFactory;
+        private readonly ConfigurationService configService;
         private const float LINE_HEIGHT = 15;
 
-        public PDFRenderService(PDFServiceFactory pdfServiceFactory)
+        public PDFRenderService(PDFServiceFactory pdfServiceFactory, ConfigurationService configService)
         {
             this.pdfServiceFactory = pdfServiceFactory;
+            this.configService = configService;
         }
 
         public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
-            string taskPlansDir = Path.Combine(Environment.CurrentDirectory, "TaskPlans");
+            // Ensure the TaskPlans directory exists
+            string taskPlansDir = configService.Settings.TaskPlansDirectoryPath;
             Directory.CreateDirectory(taskPlansDir);
-            string taskPlanPath = Path.Combine(taskPlansDir, "taskPlan.pdf");
+
+            // Now safely combine into a full destination path
+            string destinationPath = Path.Combine(taskPlansDir, "taskPlan.pdf");
 
             PDFMetadataBuilder pdfMetadataBuilder = new PDFMetadataBuilder()
-                .WithDestination(taskPlanPath)
+                .WithDestination(destinationPath)
                 .WithDimensions(764, 825)
                 .WithMargins(25, 50);
             PDFService pdfService = pdfServiceFactory
