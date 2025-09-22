@@ -115,16 +115,16 @@ jobs:
 
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-          # ensure Task folder exists
-          mkdir -p "$SCRIPT_DIR/Task"
+          # validate Task folder and tasks.json
           if [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
-            echo "⚠️ No tasks.json found, copying default..."
-            cp "$SCRIPT_DIR/Task/tasks.json" "$SCRIPT_DIR/Task/tasks.json" || true
+            echo "❌ ERROR: Task/tasks.json is missing! Package is corrupted."
+            exit 1
           fi
 
-          # ensure config.json exists
+          # validate config.json
           if [ ! -f "$SCRIPT_DIR/config.json" ]; then
-            echo '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }' > "$SCRIPT_DIR/config.json"
+            echo "❌ ERROR: config.json is missing! Package is corrupted."
+            exit 1
           fi
 
           # export config path
