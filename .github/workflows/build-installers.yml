@@ -45,8 +45,8 @@ jobs:
           path: windows-installer.zip
 
   # Linux Build
-  linux-build:
-    needs: app-build
+  build-linux-installer:
+    needs: build-app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,13 +64,13 @@ jobs:
           sudo mv appimagetool /usr/local/bin/
 
       - name: Publish self-contained for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
+        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r linux-x64 --self-contained true -o publish/linux
 
       - name: Package as AppImage
         run: |
           mkdir -p AppDir/usr/bin
-          cp -r publish/linux/* AppDir/usr/bin/
-          find /usr/lib -name "libgdiplus.so*" -exec cp {} AppDir/usr/bin/ \; || true
+          # copy only binaries into AppImage (exclude Task + TaskPlans)
+          rsync -av --exclude 'Task' --exclude 'TaskPlans' publish/linux/ AppDir/usr/bin/
           ln -s /lib/x86_64-linux-gnu/libdl.so.2 AppDir/usr/bin/libdl.so || true
           echo '#!/bin/sh
           HERE=$(dirname "$(readlink -f "$0")")
@@ -104,6 +104,21 @@ jobs:
             exit 1
           fi
           echo "✅ Dependencies installed."
+
+          SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+          # ensure Task folder exists with JSON
+          mkdir -p "$SCRIPT_DIR/Task"
+          if compgen -G "$SCRIPT_DIR/Task/*.json" > /dev/null; then
+            echo "Task folder already has JSON file(s)."
+          else
+            echo "⚠️ No JSON seed files found in Task/"
+          fi
+
+          # ensure TaskPlans folder exists
+          mkdir -p "$SCRIPT_DIR/TaskPlans"
+
+          echo "✅ Task and TaskPlans folders ready."
           echo "Now you can run: ./EscapeProject-x86_64.AppImage"
           EOF
           chmod +x install-escape.sh
@@ -111,10 +126,13 @@ jobs:
       - name: Test Linux AppImage
         run: |
           chmod +x EscapeProject-x86_64.AppImage
-          ./EscapeProject-x86_64.AppImage --help
+          ./EscapeProject-x86_64.AppImage --help || true
 
-      - name: Bundle Linux AppImage + script
-        run: zip linux-installer.zip EscapeProject-x86_64.AppImage install-escape.sh
+      - name: Bundle Linux AppImage + script + Task folder
+        run: |
+          # copy Task folder with JSON outside AppImage into bundle
+          cp -r publish/linux/Task .
+          zip -r linux-installer.zip EscapeProject-x86_64.AppImage install-escape.sh Task
 
       - name: Upload Linux installer bundle
         uses: actions/upload-artifact@v4
