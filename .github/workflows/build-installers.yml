@@ -163,28 +163,18 @@ jobs:
           # Install libgdiplus (for System.Drawing)
           brew install mono-libgdiplus
 
-          # Ensure symlink exists so .NET can find libgdiplus
+          # Ensure /usr/local/lib exists and symlink libgdiplus
+          sudo mkdir -p /usr/local/lib
           LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
-          echo "==> Linking libgdiplus into /usr/local/lib..."
-          sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
-
-          echo "✅ Dependencies installed."
-
-          # Copy app into /Applications (optional)
-          DMG_APP="./EscapeProject-x64.dmg"
-          APP_NAME="EscapeProject"
-
-          if [ -f "$DMG_APP" ]; then
-            echo "==> Mounting DMG..."
-            MOUNT_POINT=$(hdiutil attach "$DMG_APP" | grep Volumes | awk '{print $3}')
-            echo "==> Copying app to /Applications..."
-            cp -r "$MOUNT_POINT" /Applications/"$APP_NAME"
-            hdiutil detach "$MOUNT_POINT"
-            echo "✅ Installed to /Applications/$APP_NAME"
+          if [ -f "$LIB_PATH/libgdiplus.dylib" ]; then
+            sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+            echo "✅ Linked libgdiplus to /usr/local/lib/"
           else
-            echo "⚠️ No DMG found, skipping app copy. Dependencies are installed."
+            echo "❌ libgdiplus.dylib not found in $LIB_PATH"
+            exit 1
           fi
 
+          echo "✅ Dependencies installed."
           echo "Done! You can now run Escape Project from Applications or terminal."
           EOF
 
@@ -193,6 +183,7 @@ jobs:
       - name: Test macOS binary (x64 build)
         run: |
           brew install mono-libgdiplus
+          sudo mkdir -p /usr/local/lib
           LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
           sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
           mkdir -p /tmp/mnt-x64
