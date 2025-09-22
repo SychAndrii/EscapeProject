@@ -41,26 +41,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Install native deps (libgdiplus + appimagetool)
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgdiplus
+          sudo apt-get install -y libgdiplus libfuse2
           wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
+
       - name: Publish self-contained for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
+
       - name: Package as AppImage (with libgdiplus, FUSE workaround)
         run: |
           mkdir -p AppDir/usr/bin
           cp -r publish/linux/* AppDir/usr/bin/
 
-          # Copy libgdiplus wherever it is
+          # Copy libgdiplus into AppImage
           find /usr/lib -name "libgdiplus.so*" -exec cp {} AppDir/usr/bin/ \; || true
+
+          # Create AppRun launcher
+          echo '#!/bin/sh
+          HERE=$(dirname "$(readlink -f "$0")")
+          exec "$HERE/usr/bin/EscapeProjectComposition" "$@"' > AppDir/AppRun
+          chmod +x AppDir/AppRun
 
           # Minimal .desktop file
           echo '[Desktop Entry]
@@ -72,14 +82,45 @@ jobs:
 
           touch AppDir/escape-project.png
 
-          # Extract appimagetool (avoid FUSE issue)
+          # Build AppImage without FUSE (extract workaround)
           appimagetool --appimage-extract
           ./squashfs-root/AppRun AppDir EscapeProject-x86_64.AppImage
-      - name: Upload Linux build
+
+      - name: Create Linux installer script
+        run: |
+          cat << 'EOF' > install-escape.sh
+          #!/bin/bash
+          set -e
+
+          echo "==> Installing required system libraries..."
+          if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y libgdiplus libfuse2
+          elif command -v yum >/dev/null 2>&1; then
+            sudo yum install -y libgdiplus fuse
+          elif command -v pacman >/dev/null 2>&1; then
+            sudo pacman -Sy --noconfirm libgdiplus fuse2
+          else
+            echo "Unsupported Linux distribution. Please install libgdiplus and fuse manually."
+            exit 1
+          fi
+
+          echo "==> Downloading latest Escape Project AppImage..."
+          APP=EscapeProject-x86_64.AppImage
+          wget -O "$APP" https://github.com/<your-username>/<your-repo>/releases/latest/download/$APP
+          chmod +x "$APP"
+
+          echo "==> Running Escape Project..."
+          exec "./$APP"
+          EOF
+
+          chmod +x install-escape.sh
+
+      - name: Upload Linux installer script
         uses: actions/upload-artifact@v4
         with:
           name: linux-installer
-          path: EscapeProject-x86_64.AppImage
+          path: install-escape.sh
 
   # macOS Build
   build-macos:
