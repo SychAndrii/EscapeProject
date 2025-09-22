@@ -26,14 +26,33 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Publish self-contained for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained true -o publish/win
+
       - name: Test Windows binary
         run: |
           cd publish/win
           ./EscapeProjectComposition.exe --help
-      - name: Bundle Windows build
+
+      - name: Create Windows installer script
+        run: |
+          @"
+          @echo off
+          echo ==^> Installing Escape Project...
+          echo (no dependencies required on Windows)
+
+          echo.
+          echo ✅ Installation complete!
+          echo To run the program, execute:
+          echo   EscapeProjectComposition.exe --help
+          echo.
+          pause
+          "@ | Out-File -FilePath publish/win/install-escape.bat -Encoding ascii
+
+      - name: Bundle Windows build + script
         run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
+
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
@@ -117,127 +136,3 @@ jobs:
         with:
           name: linux-installer
           path: linux-installer.zip
- 
-  # macOS Build
-  build-macos-installer:
-    needs: build-app
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Publish self-contained for macOS (Intel + Apple Silicon)
-        run: |
-          dotnet publish -c Release -r osx-x64 --self-contained true -o publish/macos-x64
-          dotnet publish -c Release -r osx-arm64 --self-contained true -o publish/macos-arm64
-
-      - name: Create DMG (x64)
-        run: |
-          mkdir dmg-x64
-          cp -r publish/macos-x64/* dmg-x64/
-          hdiutil create EscapeProject-x64.dmg -srcfolder dmg-x64 -ov -format UDZO
-
-      - name: Create DMG (arm64)
-        run: |
-          mkdir dmg-arm64
-          cp -r publish/macos-arm64/* dmg-arm64/
-          hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
-
-      # 👇 Install libgdiplus (dual-arch) BEFORE testing the binaries
-      - name: Install libgdiplus (brew) and fix symlink
-        run: |
-          # Native install
-          brew install mono-libgdiplus || true
-
-          # On Apple Silicon: also install the x86_64 version under Rosetta
-          if [ "$(uname -m)" = "arm64" ]; then
-            echo "Detected Apple Silicon. Installing x86_64 libgdiplus via Rosetta..."
-            arch -x86_64 brew install mono-libgdiplus || true
-          fi
-
-          # Link whichever dylib exists
-          sudo mkdir -p /usr/local/lib
-          for path in \
-            "/usr/local/opt/mono-libgdiplus/lib/libgdiplus.dylib" \
-            "/opt/homebrew/opt/mono-libgdiplus/lib/libgdiplus.dylib"
-          do
-            if [ -f "$path" ]; then
-              echo "Linking $path"
-              sudo ln -sf "$path" /usr/local/lib/libgdiplus.dylib
-            fi
-          done
-
-          ls -l /usr/local/lib/libgdiplus.dylib || (echo "❌ libgdiplus not found" && exit 1)
-
-      - name: Test x64 DMG
-        run: |
-          mkdir -p /tmp/mnt-x64
-          hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
-          /tmp/mnt-x64/EscapeProjectComposition --help
-          hdiutil detach /tmp/mnt-x64
-
-      - name: Test arm64 DMG
-        run: |
-          mkdir -p /tmp/mnt-arm64
-          hdiutil attach EscapeProject-arm64.dmg -mountpoint /tmp/mnt-arm64
-          /tmp/mnt-arm64/EscapeProjectComposition --help
-          hdiutil detach /tmp/mnt-arm64
-
-      - name: Create macOS installer script
-        run: |
-          cat << 'EOF' > install-escape-macos.sh
-          #!/bin/bash
-          set -e
-
-          echo "==> Installing required system libraries (libgdiplus)..."
-
-          # Install Homebrew if missing
-          if ! command -v brew >/dev/null 2>&1; then
-            echo "Homebrew not found. Installing..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          fi
-
-          ARCH=$(uname -m)
-
-          # Install native libgdiplus
-          brew install mono-libgdiplus || true
-
-          # On Apple Silicon: also install x86_64 libgdiplus via Rosetta
-          if [ "$ARCH" = "arm64" ]; then
-            echo "Detected Apple Silicon. Installing x86_64 libgdiplus via Rosetta..."
-            arch -x86_64 brew install mono-libgdiplus || true
-          fi
-
-          # Link whichever dylib exists
-          sudo mkdir -p /usr/local/lib
-          for path in \
-            "/usr/local/opt/mono-libgdiplus/lib/libgdiplus.dylib" \
-            "/opt/homebrew/opt/mono-libgdiplus/lib/libgdiplus.dylib"
-          do
-            if [ -f "$path" ]; then
-              echo "✅ Linking $path"
-              sudo ln -sf "$path" /usr/local/lib/libgdiplus.dylib
-            fi
-          done
-
-          ls -l /usr/local/lib/libgdiplus.dylib || (echo "❌ libgdiplus not linked correctly" && exit 1)
-
-          echo ""
-          echo "✅ Installation complete!"
-          echo "Now you can open the Escape Project DMG, drag it to Applications, and run it."
-          EOF
-
-          chmod +x install-escape-macos.sh
-
-      - name: Upload macOS builds
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-installer
-          path: |
-            EscapeProject-x64.dmg
-            EscapeProject-arm64.dmg
-            install-escape-macos.sh
