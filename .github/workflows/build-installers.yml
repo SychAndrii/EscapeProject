@@ -147,19 +147,30 @@ jobs:
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
 
-      # Install libgdiplus BEFORE testing the binaries
+      # 👇 Install libgdiplus BEFORE testing the binaries
       - name: Install libgdiplus (brew) and fix symlink
         run: |
           brew install mono-libgdiplus
           sudo mkdir -p /usr/local/lib
-          LIBGDIPLUS=$(brew --prefix mono-libgdiplus)/lib/libgdiplus.dylib
-          echo "Found libgdiplus at: $LIBGDIPLUS"
-          if [ -f "$LIBGDIPLUS" ]; then
-            sudo ln -sf "$LIBGDIPLUS" /usr/local/lib/libgdiplus.dylib
-          else
-            echo "ERROR: libgdiplus not found in brew prefix"
-            exit 1
+          
+          # Try both default brew prefixes
+          for prefix in "/usr/local" "/opt/homebrew"; do
+            if [ -f "$prefix/opt/mono-libgdiplus/lib/libgdiplus.dylib" ]; then
+              echo "Found libgdiplus in $prefix"
+              sudo ln -sf "$prefix/opt/mono-libgdiplus/lib/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+            fi
+          done
+
+          # On Apple Silicon: also install x86_64 version under Rosetta
+          if [ "$(uname -m)" = "arm64" ]; then
+            echo "Detected Apple Silicon. Installing x86_64 libgdiplus via Rosetta..."
+            arch -x86_64 brew install mono-libgdiplus || true
+            if [ -f "/usr/local/opt/mono-libgdiplus/lib/libgdiplus.dylib" ]; then
+              sudo ln -sf "/usr/local/opt/mono-libgdiplus/lib/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+            fi
           fi
+
+          ls -l /usr/local/lib/libgdiplus.dylib || (echo "libgdiplus link failed" && exit 1)
 
       - name: Test x64 DMG
         run: |
@@ -180,28 +191,41 @@ jobs:
           cat << 'EOF' > install-escape-macos.sh
           #!/bin/bash
           set -e
+
           echo "==> Installing required system libraries (libgdiplus)..."
 
+          # Install Homebrew if missing
           if ! command -v brew >/dev/null 2>&1; then
             echo "Homebrew not found. Installing..."
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           fi
 
           ARCH=$(uname -m)
+
+          # Install native libgdiplus
           brew install mono-libgdiplus || true
 
+          # Try both brew prefixes
+          for prefix in "/usr/local" "/opt/homebrew"; do
+            if [ -f "$prefix/opt/mono-libgdiplus/lib/libgdiplus.dylib" ]; then
+              echo "✅ Found libgdiplus in $prefix"
+              sudo mkdir -p /usr/local/lib
+              sudo ln -sf "$prefix/opt/mono-libgdiplus/lib/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+            fi
+          done
+
+          # On Apple Silicon: also install x86_64 libgdiplus via Rosetta
           if [ "$ARCH" = "arm64" ]; then
             echo "Detected Apple Silicon. Installing x86_64 libgdiplus via Rosetta..."
             arch -x86_64 brew install mono-libgdiplus || true
+            if [ -f "/usr/local/opt/mono-libgdiplus/lib/libgdiplus.dylib" ]; then
+              sudo mkdir -p /usr/local/lib
+              sudo ln -sf "/usr/local/opt/mono-libgdiplus/lib/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+              echo "✅ Linked x86_64 libgdiplus for Rosetta"
+            fi
           fi
 
-          sudo mkdir -p /usr/local/lib
-          for path in "$(brew --prefix mono-libgdiplus)/lib" "/usr/local/homebrew/lib"; do
-            if [ -f "$path/libgdiplus.dylib" ]; then
-              sudo ln -sf "$path/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
-              echo "✅ Linked libgdiplus from $path"
-            fi
-          done
+          ls -l /usr/local/lib/libgdiplus.dylib || (echo "❌ libgdiplus not linked correctly" && exit 1)
 
           echo ""
           echo "✅ Installation complete!"
