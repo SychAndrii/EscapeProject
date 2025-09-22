@@ -30,18 +30,18 @@ jobs:
       - name: Publish self-contained single-file for Windows
         run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win
 
-      - name: Add config and copy repo tasks
+      - name: Add config, tasks, and launcher
         run: |
           Set-Content -Path publish/win/config.json -Value '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }'
           New-Item -ItemType Directory -Force -Path publish/win/Task | Out-Null
           Copy-Item EscapeProjectInfrastructure/Task/tasks.json publish/win/Task/tasks.json -Force
-          Set-Content -Path publish/win/escapeproject.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
+          Set-Content -Path publish/win/escape-run.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
         shell: pwsh
 
-      - name: Test Windows binary
+      - name: Test Windows launcher
         run: |
           cd publish/win
-          cmd.exe /c escapeproject.bat --help
+          cmd.exe /c escape-run.bat --help
 
       - name: Bundle Windows build
         run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
@@ -94,9 +94,9 @@ jobs:
           appimagetool --appimage-extract
           ./squashfs-root/AppRun AppDir EscapeProject-x86_64.AppImage
 
-      - name: Create Linux installer script
+      - name: Create Linux launcher script
         run: |
-          cat << 'EOF' > install-escape.sh
+          cat << 'EOF' > escape-run.sh
           #!/bin/bash
           set -e
           echo "==> Installing required system libraries..."
@@ -115,9 +115,11 @@ jobs:
 
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-          # ensure Task folder exists (copied at bundle stage)
-          if [ ! -d "$SCRIPT_DIR/Task" ]; then
-            mkdir -p "$SCRIPT_DIR/Task"
+          # ensure Task folder exists
+          mkdir -p "$SCRIPT_DIR/Task"
+          if [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+            echo "⚠️ No tasks.json found, copying default..."
+            cp "$SCRIPT_DIR/Task/tasks.json" "$SCRIPT_DIR/Task/tasks.json" || true
           fi
 
           # ensure config.json exists
@@ -125,25 +127,25 @@ jobs:
             echo '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }' > "$SCRIPT_DIR/config.json"
           fi
 
-          # export config path for runtime
+          # export config path
           export EscapeProjectAbsoluteConfigPath="$SCRIPT_DIR/config.json"
 
-          echo "✅ Config and Task folder ready."
-          echo "Run with: ./EscapeProject-x86_64.AppImage"
+          echo "✅ Environment ready. Starting app..."
+          "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
           EOF
-          chmod +x install-escape.sh
+          chmod +x escape-run.sh
 
-      - name: Test Linux AppImage
+      - name: Test Linux launcher
         run: |
           chmod +x EscapeProject-x86_64.AppImage
-          ./EscapeProject-x86_64.AppImage --help
+          ./escape-run.sh --help
 
-      - name: Bundle Linux AppImage + script + config + Task folder
+      - name: Bundle Linux AppImage + launcher + config + Task folder
         run: |
           mkdir -p Task
           cp EscapeProjectInfrastructure/Task/tasks.json Task/tasks.json   # copy from repo
           echo '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }' > config.json
-          zip -r linux-installer.zip EscapeProject-x86_64.AppImage install-escape.sh Task config.json
+          zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh Task config.json
 
       - name: Upload Linux installer bundle
         uses: actions/upload-artifact@v4
