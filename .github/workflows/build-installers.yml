@@ -147,12 +147,11 @@ jobs:
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
 
+      # 👇 Install libgdiplus BEFORE running tests
       - name: Install libgdiplus (brew) and fix symlink
         run: |
           brew install mono-libgdiplus
-          # Ensure /usr/local/lib exists
           sudo mkdir -p /usr/local/lib
-          # Find libgdiplus.dylib from brew prefix and link it
           LIBGDIPLUS=$(brew --prefix mono-libgdiplus)/lib/libgdiplus.dylib
           echo "Found libgdiplus at: $LIBGDIPLUS"
           if [ -f "$LIBGDIPLUS" ]; then
@@ -183,15 +182,12 @@ jobs:
           set -e
           echo "==> Installing required system libraries (libgdiplus)..."
 
-          # Install Homebrew if missing
           if ! command -v brew >/dev/null 2>&1; then
             echo "Homebrew not found. Installing..."
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           fi
 
-          # Detect architecture
           ARCH=$(uname -m)
-
           brew install mono-libgdiplus || true
 
           if [ "$ARCH" = "arm64" ]; then
