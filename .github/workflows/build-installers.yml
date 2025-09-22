@@ -37,10 +37,10 @@ jobs:
           New-Item -ItemType Directory -Force -Path publish/win/Task | Out-Null
           Copy-Item EscapeProjectInfrastructure/Task/tasks.json publish/win/Task/tasks.json -Force
 
-          # Correctly create config.json
-          Set-Content -LiteralPath publish/win/config.json -Value '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }'
+          # ✅ FIXED: config.json with correct keys
+          Set-Content -LiteralPath publish/win/config.json -Value '{ "TasksFilePath": "./Task/tasks.json", "TaskPlansDirectoryPath": "./TaskPlans" }'
 
-          # Create .bat launcher
+          # Batch launcher script
           Set-Content -Path publish/win/escape-run.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
         shell: pwsh
 
@@ -88,6 +88,9 @@ jobs:
           mkdir -p publish/linux/Task
           cp EscapeProjectComposition/config.json publish/linux/config.json
           cp EscapeProjectInfrastructure/Task/tasks.json publish/linux/Task/tasks.json
+
+          # ✅ FIXED: config.json with correct keys
+          echo '{ "TasksFilePath": "./Task/tasks.json", "TaskPlansDirectoryPath": "./TaskPlans" }' > publish/linux/config.json
 
       - name: Package as AppImage
         run: |
