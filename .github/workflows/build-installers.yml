@@ -144,10 +144,10 @@ jobs:
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
       - name: Test macOS binary
         run: |
-          hdiutil attach EscapeProject-x64.dmg
-          VOL=$(ls /Volumes | grep EscapeProject)
-          /Volumes/$VOL/EscapeProjectComposition --help
-          hdiutil detach "/Volumes/$VOL"
+          mkdir -p /tmp/mnt-x64
+          hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
+          /tmp/mnt-x64/EscapeProjectComposition --help
+          hdiutil detach /tmp/mnt-x64
       - name: Bundle macOS builds
         run: zip macos-installer.zip EscapeProject-x64.dmg EscapeProject-arm64.dmg
       - name: Upload macOS builds
