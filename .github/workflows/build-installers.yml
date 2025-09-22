@@ -46,7 +46,7 @@ jobs:
 
   # Linux Build
   build-linux-installer:
-    needs: build-app
+    needs: app-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
