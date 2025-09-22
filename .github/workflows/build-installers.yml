@@ -5,6 +5,7 @@ on:
     branches: [ "workflow/installers" ]
 
 jobs:
+  # Build check job (shared dependency)
   build-app:
     runs-on: ubuntu-latest
     steps:
@@ -35,17 +36,15 @@ jobs:
           path: publish/win/**
 
   # Linux Build
-  build-linux:
-    needs: build-check
+  build-linux-installer:
+    needs: build-app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
       - name: Install native deps (libgdiplus + appimagetool)
         run: |
           sudo apt-get update
@@ -53,10 +52,8 @@ jobs:
           wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
-
       - name: Publish self-contained for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
-
       - name: Package as AppImage (with libgdiplus, FUSE workaround, libdl fix)
         run: |
           mkdir -p AppDir/usr/bin
@@ -87,7 +84,6 @@ jobs:
           # Build AppImage without FUSE (extract workaround)
           appimagetool --appimage-extract
           ./squashfs-root/AppRun AppDir EscapeProject-x86_64.AppImage
-
       - name: Create Linux installer script
         run: |
           cat << 'EOF' > install-escape.sh
@@ -120,7 +116,6 @@ jobs:
           EOF
 
           chmod +x install-escape.sh
-
       - name: Upload Linux build + installer script
         uses: actions/upload-artifact@v4
         with:
