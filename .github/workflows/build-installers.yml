@@ -1,0 +1,214 @@
+name: Build Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  app-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore and build (no publish yet)
+        run: dotnet build --configuration Release
+
+  windows-build:
+    needs: app-build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish self-contained single-file for Windows
+        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win
+
+      - name: Add config, tasks, and launcher
+        run: |
+          New-Item -ItemType Directory -Force -Path publish/win/Task | Out-Null
+          Copy-Item EscapeProjectInfrastructure/Task/tasks.json publish/win/Task/tasks.json -Force
+
+          # ✅ Valid config.json with correct keys
+          Set-Content -LiteralPath publish/win/config.json -Value '{ "TasksFilePath": "./Task/tasks.json", "TaskPlansDirectoryPath": "./TaskPlans" }'
+
+          # Create batch launcher
+          Set-Content -Path publish/win/escape-run.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
+        shell: pwsh
+
+      - name: Test Windows launcher (fail on error)
+        shell: pwsh
+        run: |
+          cd publish/win
+          try {
+            cmd.exe /c escape-run.bat --help
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "❌ App exited with code $LASTEXITCODE"
+              exit $LASTEXITCODE
+            }
+          } catch {
+            Write-Error "❌ Launcher failed: $_"
+            exit 1
+          }
+
+      - name: Bundle Windows build
+        run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: windows-installer.zip
+
+  linux-build:
+    needs: app-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install native deps (libgdiplus + appimagetool)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
+          wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/
+
+      - name: Publish self-contained for Linux
+        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r linux-x64 --self-contained true -o publish/linux
+
+      - name: Copy config and tasks into publish output
+        run: |
+          mkdir -p publish/linux/Task
+          cp EscapeProjectInfrastructure/Task/tasks.json publish/linux/Task/tasks.json
+
+          # ✅ Valid config.json with correct keys
+          echo '{ "TasksFilePath": "./Task/tasks.json", "TaskPlansDirectoryPath": "./TaskPlans" }' > publish/linux/config.json
+
+      - name: Package as AppImage
+        run: |
+          mkdir -p AppDir/usr/bin
+          rsync -av publish/linux/ AppDir/usr/bin/
+          ln -s /lib/x86_64-linux-gnu/libdl.so.2 AppDir/usr/bin/libdl.so || true
+
+          echo '#!/bin/sh
+          HERE=$(dirname "$(readlink -f "$0")")
+          exec "$HERE/usr/bin/EscapeProjectComposition" "$@"' > AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          echo '[Desktop Entry]
+          Name=Escape Project
+          Exec=EscapeProjectComposition
+          Icon=escape-project
+          Type=Application
+          Categories=Utility;' > AppDir/escape-project.desktop
+          touch AppDir/escape-project.png
+
+          appimagetool --appimage-extract
+          ./squashfs-root/AppRun AppDir EscapeProject-x86_64.AppImage
+
+      - name: Create Linux launcher script
+        run: |
+          cat << 'EOF' > escape-run.sh
+          #!/bin/bash
+          set -e
+          echo "==> Installing required system libraries..."
+          if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
+          elif command -v yum >/dev/null 2>&1; then
+            sudo yum install -y libgdiplus fuse
+          elif command -v pacman >/dev/null 2>&1; then
+            sudo pacman -Sy --noconfirm libgdiplus fuse2
+          else
+            echo "Unsupported Linux distribution. Please install libgdiplus and fuse manually."
+            exit 1
+          fi
+          echo "✅ Dependencies installed."
+
+          SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+          if [ ! -f "$SCRIPT_DIR/config.json" ] || [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+            echo "⚠️  Extracting files from AppImage..."
+            mkdir -p "$SCRIPT_DIR/Task"
+            "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" --appimage-extract > /dev/null
+
+            if [ ! -f "$SCRIPT_DIR/config.json" ]; then
+              cp squashfs-root/usr/bin/config.json "$SCRIPT_DIR/config.json"
+            fi
+
+            if [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+              cp squashfs-root/usr/bin/Task/tasks.json "$SCRIPT_DIR/Task/tasks.json"
+            fi
+
+            rm -rf squashfs-root
+          fi
+
+          export EscapeProjectAbsoluteConfigPath="$SCRIPT_DIR/config.json"
+          echo "✅ Environment ready. Starting app..."
+          "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
+          EOF
+          chmod +x escape-run.sh
+
+      - name: Test Linux launcher (fail on error)
+        run: |
+          chmod +x EscapeProject-x86_64.AppImage
+          ./escape-run.sh --help || { echo "❌ App failed to run"; exit 1; }
+
+      - name: Bundle Linux installer
+        run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh
+
+      - name: Upload Linux installer bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-installer
+          path: linux-installer.zip
+
+  release:
+    needs: [windows-build, linux-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Windows installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: artifacts
+
+      - name: Download Linux installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-installer
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            🚀 First release of Escape Project.
+
+            Includes:
+            - ✅ Windows Installer (ZIP)
+            - ✅ Linux AppImage Installer (ZIP)
+
+            You can modify tasks inside `tasks.json` and regenerate PDF + Excel using the launchers.
+          files: |
+            artifacts/windows-installer.zip
+            artifacts/linux-installer.zip

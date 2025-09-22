@@ -2,16 +2,17 @@
 using BaseDomain;
 using EscapeProject.Task;
 using EscapeProjectDomain;
+using EscapeProjectInfrastructure.Configuration;
 
 namespace EscapeProjectInfrastructure.Task
 {
     public class JSONTaskGroupRepository : TaskGroupRepository
     {
-        private readonly string filePath;
+        private readonly ConfigurationService configService;
 
-        public JSONTaskGroupRepository(string filePath)
+        public JSONTaskGroupRepository(ConfigurationService configService)
         {
-            this.filePath = filePath;
+            this.configService = configService;
         }
 
         public IUnitOfWork UnitOfWork
@@ -21,13 +22,13 @@ namespace EscapeProjectInfrastructure.Task
 
         public async Task<List<TaskGroupAggregate>> GetTaskGroups()
         {
-            if (!File.Exists(filePath))
+            string jsonFile = configService.Settings.TasksFilePath;
+            if (!File.Exists(jsonFile))
             {
-                throw new FileNotFoundException($"File not found: {filePath}");
+                throw new FileNotFoundException($"File not found: {jsonFile}");
             }
 
-            string json = await File.ReadAllTextAsync(filePath);
-
+            string json = await File.ReadAllTextAsync(jsonFile);
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,

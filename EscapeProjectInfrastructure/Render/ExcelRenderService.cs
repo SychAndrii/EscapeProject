@@ -1,6 +1,7 @@
 ﻿using BaseDomain;
 using EscapeProjectApplication.Services;
 using EscapeProjectDomain;
+using EscapeProjectInfrastructure.Configuration;
 using UIApplication.Excel;
 using UIDomain.Select;
 using UIDomain.Text;
@@ -10,20 +11,29 @@ namespace EscapeProjectInfrastructure.Render
     public class ExcelRenderService : RenderService
     {
         private readonly ExcelServiceFactory excelServiceFactory;
+        private readonly ConfigurationService configService;
 
-        public ExcelRenderService(ExcelServiceFactory excelServiceFactory)
+        public ExcelRenderService(ExcelServiceFactory excelServiceFactory, ConfigurationService configService)
         {
             this.excelServiceFactory = excelServiceFactory;
+            this.configService = configService;
         }
 
         public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
+            // Ensure the TaskPlans directory exists
+            string taskPlansDir = configService.Settings.TaskPlansDirectoryPath;
+            Directory.CreateDirectory(taskPlansDir);
+
+            // Now safely combine into a full destination path
+            string destinationPath = Path.Combine(taskPlansDir, "taskPlan.xlsx");
+
             ExcelMetadataBuilder excelMetadataBuilder = new ExcelMetadataBuilder()
-                .WithDestination("file.xlsx")
+                .WithDestination(destinationPath)
                 .WithColumns([
                     GetColumn("Task"), GetColumn("Status"),
                     GetColumn("Duration"), GetColumn("Time Range")
-                ]);
+            ]);
             ExcelService excelService = excelServiceFactory
                 .Create(excelMetadataBuilder);
 
