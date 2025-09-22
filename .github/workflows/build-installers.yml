@@ -186,6 +186,9 @@ jobs:
           sudo mkdir -p /usr/local/lib
           LIB_PATH=$(brew --prefix mono-libgdiplus)/lib
           sudo ln -sf "$LIB_PATH/libgdiplus.dylib" /usr/local/lib/libgdiplus.dylib
+          
+          export DYLD_LIBRARY_PATH="$LIB_PATH:$DYLD_LIBRARY_PATH"
+          
           mkdir -p /tmp/mnt-x64
           hdiutil attach EscapeProject-x64.dmg -mountpoint /tmp/mnt-x64
           /tmp/mnt-x64/EscapeProjectComposition --help
