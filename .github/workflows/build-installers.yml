@@ -37,20 +37,27 @@ jobs:
           New-Item -ItemType Directory -Force -Path publish/win/Task | Out-Null
           Copy-Item EscapeProjectInfrastructure/Task/tasks.json publish/win/Task/tasks.json -Force
 
-          # ✅ FIXED: config.json with correct keys
+          # ✅ Valid config.json with correct keys
           Set-Content -LiteralPath publish/win/config.json -Value '{ "TasksFilePath": "./Task/tasks.json", "TaskPlansDirectoryPath": "./TaskPlans" }'
 
-          # Batch launcher script
+          # Create batch launcher
           Set-Content -Path publish/win/escape-run.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
         shell: pwsh
 
-      - name: Check Windows config file
-        run: dir publish/win
-
-      - name: Test Windows launcher
+      - name: Test Windows launcher (fail on error)
+        shell: pwsh
         run: |
           cd publish/win
-          cmd.exe /c escape-run.bat --help
+          try {
+            cmd.exe /c escape-run.bat --help
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "❌ App exited with code $LASTEXITCODE"
+              exit $LASTEXITCODE
+            }
+          } catch {
+            Write-Error "❌ Launcher failed: $_"
+            exit 1
+          }
 
       - name: Bundle Windows build
         run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
@@ -86,10 +93,9 @@ jobs:
       - name: Copy config and tasks into publish output
         run: |
           mkdir -p publish/linux/Task
-          cp EscapeProjectComposition/config.json publish/linux/config.json
           cp EscapeProjectInfrastructure/Task/tasks.json publish/linux/Task/tasks.json
 
-          # ✅ FIXED: config.json with correct keys
+          # ✅ Valid config.json with correct keys
           echo '{ "TasksFilePath": "./Task/tasks.json", "TaskPlansDirectoryPath": "./TaskPlans" }' > publish/linux/config.json
 
       - name: Package as AppImage
@@ -157,10 +163,10 @@ jobs:
           EOF
           chmod +x escape-run.sh
 
-      - name: Test Linux launcher
+      - name: Test Linux launcher (fail on error)
         run: |
           chmod +x EscapeProject-x86_64.AppImage
-          ./escape-run.sh --help
+          ./escape-run.sh --help || { echo "❌ App failed to run"; exit 1; }
 
       - name: Bundle Linux installer
         run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh
