@@ -2,7 +2,8 @@ name: Build Installers
 
 on:
   push:
-    branches: [ "workflow/installers" ]
+    tags:
+      - 'v*'
 
 jobs:
   app-build:
@@ -176,3 +177,38 @@ jobs:
         with:
           name: linux-installer
           path: linux-installer.zip
+
+  release:
+    needs: [windows-build, linux-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Windows installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: artifacts
+
+      - name: Download Linux installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-installer
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            🚀 First release of Escape Project.
+
+            Includes:
+            - ✅ Windows Installer (ZIP)
+            - ✅ Linux AppImage Installer (ZIP)
+
+            You can modify tasks inside `tasks.json` and regenerate PDF + Excel using the launchers.
+          files: |
+            artifacts/windows-installer.zip
+            artifacts/linux-installer.zip

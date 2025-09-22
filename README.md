@@ -46,13 +46,56 @@ Both PDF and Excel formats ensure that your tasks stay **accessible, editable, a
 
 ## Getting Started
 
-- The **EscapeProjectInfrastructure/Task/tasks.json** file contains the structure of your tasks.  
-- Running **EscapeProjectComposition/Program.cs** generates two files inside the build output folder:  
-  - **EscapeProjectComposition/bin/Debug/net8.0** (if running in Debug mode)  
-  - **EscapeProjectComposition/bin/Release/net8.0** (if running in Release mode)  
+Escape Project is ready to use immediately — no setup required.
 
-  The generated files are:  
-  - **file.pdf** → A portable PDF version of your tasks (with checkboxes).  
-  - **file.xlsx** → An Excel version of your tasks (with structured columns and dropdowns).  
+---
 
-- To modify tasks, simply edit the JSON file and re-run the program.
+### 🛠️ Using the Prebuilt Installer
+
+1. **Download the installer** for your platform:
+   - `windows-installer.zip` (contains `.exe` and `escape-run.bat`)
+   - `linux-installer.zip` (contains `.AppImage` and `escape-run.sh`)
+
+2. **Extract the archive** anywhere on your system (e.g., Desktop).
+
+3. **Run the launcher:**
+   - On **Windows**, double-click `escape-run.bat`
+   - On **Linux**, run `./escape-run.sh` (you may need to `chmod +x` it first)
+
+4. ✅ That’s it! The app will:
+   - Read your tasks from `Task/tasks.json`
+   - Generate:
+     - `file.pdf` — a printable version with checkboxes
+     - `file.xlsx` — an editable Excel version with structured columns and dropdowns
+
+---
+
+### ✍️ Customizing Paths with `config.json`
+
+By default, the app looks for `config.json` in the same folder as the launcher.  
+You can use this file to change where tasks are loaded from and where output files are saved.
+
+**Example:**
+
+```json
+{
+    "TasksFilePath": "./Task/tasks.json",
+    "TaskPlansDirectoryPath": "./TaskPlans"
+}
+```
+
+- `TasksFilePath` — path to your input task list (a `.json` file)
+- `TaskPlansDirectoryPath` — folder where `file.pdf` and `file.xlsx` will be created
+
+You can change these paths to point to any custom location (absolute or relative).
+
+---
+
+### 🔁 Updating Tasks
+
+To modify your tasks:
+
+- Open the file at the path defined by `TasksFilePath` (by default, `Task/tasks.json`)
+- Edit it using any text editor
+- Rerun the launcher — the new PDF and Excel files will reflect your changes
+
