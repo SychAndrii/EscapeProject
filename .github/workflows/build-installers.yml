@@ -34,11 +34,18 @@ jobs:
 
       - name: Add config, tasks, and launcher
         run: |
-          Set-Content -Path publish/win/config.json -Value '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }'
           New-Item -ItemType Directory -Force -Path publish/win/Task | Out-Null
           Copy-Item EscapeProjectInfrastructure/Task/tasks.json publish/win/Task/tasks.json -Force
+
+          # Correctly create config.json
+          Set-Content -LiteralPath publish/win/config.json -Value '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }'
+
+          # Create .bat launcher
           Set-Content -Path publish/win/escape-run.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
         shell: pwsh
+
+      - name: Check Windows config file
+        run: dir publish/win
 
       - name: Test Windows launcher
         run: |
@@ -87,10 +94,12 @@ jobs:
           mkdir -p AppDir/usr/bin
           rsync -av publish/linux/ AppDir/usr/bin/
           ln -s /lib/x86_64-linux-gnu/libdl.so.2 AppDir/usr/bin/libdl.so || true
+
           echo '#!/bin/sh
           HERE=$(dirname "$(readlink -f "$0")")
           exec "$HERE/usr/bin/EscapeProjectComposition" "$@"' > AppDir/AppRun
           chmod +x AppDir/AppRun
+
           echo '[Desktop Entry]
           Name=Escape Project
           Exec=EscapeProjectComposition
@@ -98,6 +107,7 @@ jobs:
           Type=Application
           Categories=Utility;' > AppDir/escape-project.desktop
           touch AppDir/escape-project.png
+
           appimagetool --appimage-extract
           ./squashfs-root/AppRun AppDir EscapeProject-x86_64.AppImage
 
