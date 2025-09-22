@@ -23,7 +23,7 @@ namespace EscapeProjectComposition
             TasksController tasksControllerPDF = new TasksController(useCasePDF);
             await tasksControllerPDF.GenerateTaskPlan();
 
-            ExcelServiceFactory excelServiceFactory = new OpenXMLExcelServiceFactory();
+            ExcelServiceFactory excelServiceFactory = new ClosedXMLExcelServiceFactory();
             RenderService renderServiceExcel = new ExcelRenderService(excelServiceFactory);
             GenerateTaskPlanUseCase useCaseExcel = new GenerateTaskPlanUseCase(taskGroupRepository, renderServiceExcel);
             TasksController tasksControllerExcel = new TasksController(useCaseExcel);

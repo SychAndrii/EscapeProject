@@ -2,11 +2,11 @@
 
 namespace UIInfrastructure.Excel
 {
-    public class OpenXMLExcelServiceFactory : ExcelServiceFactory
+    public class ClosedXMLExcelServiceFactory : ExcelServiceFactory
     {
         public override ExcelService Create(ExcelMetadataBuilder metadataBuilder)
         {
-            return new OpenXMLExcelService(metadataBuilder);
+            return new ClosedXMLExcelService(metadataBuilder);
         }
     }
 }

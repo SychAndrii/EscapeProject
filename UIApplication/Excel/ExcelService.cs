@@ -1,4 +1,4 @@
-﻿using UIDomain.Checkbox;
+﻿using UIDomain.Select;
 using UIDomain.Text;
 
 namespace UIApplication.Excel
@@ -74,7 +74,7 @@ namespace UIApplication.Excel
 
         /* Render methods */
         public abstract void RenderText(TextSettingsBuilder settingsBuilder);
-        public abstract void RenderCheckbox(CheckboxSettingsBuilder settingsBuilder);
+        public abstract void RenderSelect(SelectSettingsBuilder settingsBuilder);
 
         /* Excel document state manipulation methods */
         public void GoToWorksheet(string worksheet)

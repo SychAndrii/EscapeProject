@@ -2,7 +2,7 @@
 using EscapeProjectApplication.Services;
 using EscapeProjectDomain;
 using UIApplication.Excel;
-using UIDomain.Checkbox;
+using UIDomain.Select;
 using UIDomain.Text;
 
 namespace EscapeProjectInfrastructure.Render
@@ -34,15 +34,20 @@ namespace EscapeProjectInfrastructure.Render
 
                 foreach (TaskEntity task in tasksForGroup)
                 {
-                    TextSettingsBuilder headerBuilder = new TextSettingsBuilder(task.Name);
-                    headerBuilder
-                        .WithFontWeight(TextWeight.BOLD)
-                        .WithFontSize(20);
-                    excelService.RenderText(headerBuilder);
+                    TextSettingsBuilder taskNameBuilder = new TextSettingsBuilder(task.Name);
+                    taskNameBuilder
+                        .WithFontWeight(TextWeight.BOLD);
+                    excelService.RenderText(taskNameBuilder);
 
                     excelService.CurrentPos = (excelService.CurrentPos.row, "Status");
-                    var checkboxBuilder = new CheckboxSettingsBuilder();
-                    excelService.RenderCheckbox(checkboxBuilder);
+
+                    var notDoneOptionBuilder = new TextSettingsBuilder("Not done");
+                    var doneOptionBuilder = new TextSettingsBuilder("Done");
+
+                    SelectSettingsBuilder statusSelectBuilder = new SelectSettingsBuilder()
+                                                    .AddOptions([notDoneOptionBuilder, doneOptionBuilder])
+                                                    .WithSelectedIndex(0);
+                    excelService.RenderSelect(statusSelectBuilder);
 
                     excelService.CurrentPos = (excelService.CurrentPos.row, "Duration");
                     var durationText = task.Duration();
