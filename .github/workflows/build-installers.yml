@@ -147,7 +147,7 @@ jobs:
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
 
-      # 👇 Install libgdiplus BEFORE running tests
+      # Install libgdiplus BEFORE testing the binaries
       - name: Install libgdiplus (brew) and fix symlink
         run: |
           brew install mono-libgdiplus
