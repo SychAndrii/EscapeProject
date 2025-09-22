@@ -5,7 +5,6 @@ on:
     branches: [ "workflow/installers" ]
 
 jobs:
-  # Build check job (shared dependency)
   build-app:
     runs-on: ubuntu-latest
     steps:
@@ -29,11 +28,17 @@ jobs:
           dotnet-version: 8.0.x
       - name: Publish self-contained for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained true -o publish/win
+      - name: Test Windows binary
+        run: |
+          cd publish/win
+          ./EscapeProjectComposition.exe --help
+      - name: Bundle Windows build
+        run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
-          path: publish/win/**
+          path: windows-installer.zip
 
   # Linux Build
   build-linux-installer:
@@ -97,10 +102,14 @@ jobs:
           echo "✅ Dependencies installed."
           echo "Now you can run: ./EscapeProject-x86_64.AppImage"
           EOF
-
           chmod +x install-escape.sh
 
-      - name: Bundle AppImage + script
+      - name: Test Linux AppImage
+        run: |
+          chmod +x EscapeProject-x86_64.AppImage
+          ./EscapeProject-x86_64.AppImage --help
+
+      - name: Bundle Linux AppImage + script
         run: zip linux-installer.zip EscapeProject-x86_64.AppImage install-escape.sh
 
       - name: Upload Linux installer bundle
@@ -133,10 +142,16 @@ jobs:
           mkdir dmg-arm64
           cp -r publish/macos-arm64/* dmg-arm64/
           hdiutil create EscapeProject-arm64.dmg -srcfolder dmg-arm64 -ov -format UDZO
+      - name: Test macOS binary
+        run: |
+          hdiutil attach EscapeProject-x64.dmg
+          VOL=$(ls /Volumes | grep EscapeProject)
+          /Volumes/$VOL/EscapeProjectComposition --help
+          hdiutil detach "/Volumes/$VOL"
+      - name: Bundle macOS builds
+        run: zip macos-installer.zip EscapeProject-x64.dmg EscapeProject-arm64.dmg
       - name: Upload macOS builds
         uses: actions/upload-artifact@v4
         with:
           name: macos-installer
-          path: |
-            EscapeProject-x64.dmg
-            EscapeProject-arm64.dmg
+          path: macos-installer.zip
