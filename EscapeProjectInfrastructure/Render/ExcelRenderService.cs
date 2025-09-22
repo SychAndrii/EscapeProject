@@ -18,17 +18,12 @@ namespace EscapeProjectInfrastructure.Render
 
         public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
-            string baseDir = AppContext.BaseDirectory;
-            string taskPlansDir = Path.Combine(baseDir, "TaskPlans");
-
-            // Ensure directory exists
+            string taskPlansDir = Path.Combine(Environment.CurrentDirectory, "TaskPlans");
             Directory.CreateDirectory(taskPlansDir);
-
-            // Now safe to build the file path
-            string taskPlansPath = Path.Combine(taskPlansDir, "taskPlan.xlsx");
+            string taskPlanPath = Path.Combine(taskPlansDir, "taskPlan.xlsx");
 
             ExcelMetadataBuilder excelMetadataBuilder = new ExcelMetadataBuilder()
-                .WithDestination(taskPlansPath)
+                .WithDestination(taskPlanPath)
                 .WithColumns([
                     GetColumn("Task"), GetColumn("Status"),
                     GetColumn("Duration"), GetColumn("Time Range")

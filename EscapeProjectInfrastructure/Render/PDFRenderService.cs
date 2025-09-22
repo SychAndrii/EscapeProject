@@ -19,17 +19,12 @@ namespace EscapeProjectInfrastructure.Render
 
         public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
-            string baseDir = AppContext.BaseDirectory;
-            string taskPlansDir = Path.Combine(baseDir, "TaskPlans");
-
-            // Ensure directory exists
+            string taskPlansDir = Path.Combine(Environment.CurrentDirectory, "TaskPlans");
             Directory.CreateDirectory(taskPlansDir);
-
-            // Now safe to build the file path
-            string taskPlansPath = Path.Combine(taskPlansDir, "taskPlan.pdf");
+            string taskPlanPath = Path.Combine(taskPlansDir, "taskPlan.pdf");
 
             PDFMetadataBuilder pdfMetadataBuilder = new PDFMetadataBuilder()
-                .WithDestination(taskPlansPath)
+                .WithDestination(taskPlanPath)
                 .WithDimensions(764, 825)
                 .WithMargins(25, 50);
             PDFService pdfService = pdfServiceFactory
