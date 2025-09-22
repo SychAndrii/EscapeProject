@@ -15,7 +15,9 @@ namespace EscapeProjectComposition
     {
         private static async Task Main(string[] args)
         {
-            TaskGroupRepository taskGroupRepository = new JSONTaskGroupRepository("Task/tasks.json");
+            string baseDir = AppContext.BaseDirectory;
+            string tasksJSONPath = Path.Combine(baseDir, "Task", "tasks.json");
+            TaskGroupRepository taskGroupRepository = new JSONTaskGroupRepository(tasksJSONPath);
 
             PDFServiceFactory pdfServiceFactory = new ITextPDFServiceFactory();
             RenderService renderServicePDF = new PDFRenderService(pdfServiceFactory);

@@ -5,8 +5,7 @@ on:
     branches: [ "workflow/installers" ]
 
 jobs:
-  # Shared build check
-  build-check:
+  build-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +17,7 @@ jobs:
         run: dotnet build --configuration Release
 
   # Windows Build
-  build-windows:
+  build-windows-installer:
     needs: build-check
     runs-on: windows-latest
     steps:
@@ -36,7 +35,7 @@ jobs:
           path: publish/win/**
 
   # Linux Build
-  build-linux:
+  build-linux-installer:
     needs: build-check
     runs-on: ubuntu-latest
     steps:
@@ -128,7 +127,7 @@ jobs:
             install-escape.sh
 
   # macOS Build
-  build-macos:
+  build-macos-installer:
     needs: build-check
     runs-on: macos-latest
     steps:
