@@ -56,7 +56,14 @@ namespace UIApplication.Excel
                 {
                     throw new Exception("Excel row coordinate in Excel document must be >= 0");
                 }
-                if (!ExcelMetadata.Columns.Contains(value.col))
+
+                List<string> columnValues = [];
+                foreach (var settingsBuilder in ExcelMetadata.Columns)
+                {
+                    columnValues.Add(settingsBuilder.Build().Text);
+                }
+
+                if (!columnValues.Contains(value.col))
                 {
                     throw new Exception("Excel column coordinate in Excel document does not exist");
                 }
@@ -80,7 +87,8 @@ namespace UIApplication.Excel
         public void GoToWorksheet(string worksheet)
         {
             CurrentWorksheet = worksheet;
-            CurrentPos = (0, ExcelMetadata.Columns[0]);
+            var settings = ExcelMetadata.Columns[0].Build();
+            CurrentPos = (0, settings.Text);
             OnCurrentWorksheetChanged();
         }
         public void CreateNewWorksheet(string worksheet)

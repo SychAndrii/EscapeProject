@@ -1,15 +1,17 @@
-﻿namespace UIApplication.Excel
+﻿using UIDomain.Text;
+
+namespace UIApplication.Excel
 {
     public class ExcelMetadata
     {
-        private List<string> columns;
+        private List<TextSettingsBuilder> columns;
 
         public string Destination
         {
             get;
         }
 
-        public List<string> Columns
+        public List<TextSettingsBuilder> Columns
         {
             get => columns;
             set
@@ -26,7 +28,7 @@
             }
         }
 
-        public ExcelMetadata(string destination, List<string> columns)
+        public ExcelMetadata(string destination, List<TextSettingsBuilder> columns)
         {
             Destination = destination;
             Columns = columns;

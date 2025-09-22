@@ -20,7 +20,10 @@ namespace EscapeProjectInfrastructure.Render
         {
             ExcelMetadataBuilder excelMetadataBuilder = new ExcelMetadataBuilder()
                 .WithDestination("file.xlsx")
-                .WithColumns(["Task", "Status", "Duration", "Time Range"]);
+                .WithColumns([
+                    GetColumn("Task"), GetColumn("Status"),
+                    GetColumn("Duration"), GetColumn("Time Range")
+                ]);
             ExcelService excelService = excelServiceFactory
                 .Create(excelMetadataBuilder);
 
@@ -67,7 +70,6 @@ namespace EscapeProjectInfrastructure.Render
                     }
 
                     var rangeTextBuilder = new TextSettingsBuilder(rangeText)
-                                                .WithFontSize(10)
                                                 .WithFontStyle(TextStyle.ITALIC);
                     excelService.RenderText(rangeTextBuilder);
 
@@ -77,6 +79,15 @@ namespace EscapeProjectInfrastructure.Render
 
             excelService.RemoveWorksheet(ExcelService.DEFAULT_WORKSHEET);
             excelService.Close();
+        }
+
+        private TextSettingsBuilder GetColumn(string value)
+        {
+            var columnBuilder = new TextSettingsBuilder(value)
+                .WithFontWeight(TextWeight.BOLD)
+                .WithFontSize(14)
+                .WithFontStyle(TextStyle.ITALIC);
+            return columnBuilder;
         }
     }
 }

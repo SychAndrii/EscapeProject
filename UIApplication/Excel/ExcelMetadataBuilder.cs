@@ -1,9 +1,11 @@
-﻿namespace UIApplication.Excel
+﻿using UIDomain.Text;
+
+namespace UIApplication.Excel
 {
     public class ExcelMetadataBuilder
     {
         private string? destination;
-        private List<string>? columns;
+        private List<TextSettingsBuilder>? columns;
 
         public ExcelMetadataBuilder WithDestination(string dest)
         {
@@ -11,7 +13,7 @@
             return this;
         }
 
-        public ExcelMetadataBuilder WithColumns(List<string> columns)
+        public ExcelMetadataBuilder WithColumns(List<TextSettingsBuilder> columns)
         {
             this.columns = columns;
             return this;

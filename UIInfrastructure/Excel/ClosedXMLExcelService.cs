@@ -38,9 +38,19 @@ namespace UIInfrastructure.Excel
 
             // Add column headers
             int colIdx = 1;
-            foreach (var colName in ExcelMetadata.Columns)
+            foreach (var colSettingsBuilder in ExcelMetadata.Columns)
             {
-                sheet.Cell(1, colIdx).Value = colName;
+                TextSettings colSettings = colSettingsBuilder.Build();
+                IXLCell cell = sheet.Cell(1, colIdx);
+                cell.Value = colSettings.Text;
+
+                // Apply font
+                var font = cell.Style.Font;
+                font.FontSize = colSettings.FontSize;
+                font.FontName = colSettings.Font.ToString();
+                font.Bold = colSettings.FontWeight == TextWeight.BOLD;
+                font.Italic = colSettings.FontStyle == TextStyle.ITALIC;
+                cell.Style.Protection.SetLocked(true);
                 colIdx++;
             }
         }
@@ -57,7 +67,12 @@ namespace UIInfrastructure.Excel
             string value = settings.Text ?? string.Empty;
 
             int row = CurrentPos.row + 2;
-            int col = ExcelMetadata.Columns.IndexOf(CurrentPos.col) + 1;
+            List<string> columnValues = [];
+            foreach (var columnSettingsBuilder in ExcelMetadata.Columns)
+            {
+                columnValues.Add(columnSettingsBuilder.Build().Text);
+            }
+            int col = columnValues.IndexOf(CurrentPos.col) + 1;
 
             IXLCell cell = currentSheet.Cell(row, col);
             cell.Value = value;
@@ -76,14 +91,30 @@ namespace UIInfrastructure.Excel
         {
             var settings = settingsBuilder.Build();
             int row = CurrentPos.row + 2;
-            int col = ExcelMetadata.Columns.IndexOf(CurrentPos.col) + 1;
+            List<string> columnValues = [];
+            foreach (var columnSettingsBuilder in ExcelMetadata.Columns)
+            {
+                columnValues.Add(columnSettingsBuilder.Build().Text);
+            }
+            int col = columnValues.IndexOf(CurrentPos.col) + 1;
+
             IXLCell cell = currentSheet.Cell(row, col);
-            cell.Style.Protection.SetLocked(false);
 
-            var selectedText = settings.Options[settings.SelectedOptionIndex].Build().Text;
-            cell.Value = selectedText;
+            // Get selected text and settings
+            var selectedTextSettings = settings.Options[settings.SelectedOptionIndex].Build();
+            cell.Value = selectedTextSettings.Text;
 
-            // Dropdown options on hidden sheet
+            // Apply font styling to the selected option cell
+            var font = cell.Style.Font;
+            font.FontSize = selectedTextSettings.FontSize;
+            font.FontName = selectedTextSettings.Font.ToString();
+            font.Bold = selectedTextSettings.FontWeight == TextWeight.BOLD;
+            font.Italic = selectedTextSettings.FontStyle == TextStyle.ITALIC;
+
+            // Allow editing for dropdowns
+            cell.Style.Protection.Locked = false;
+
+            // Write options to hidden sheet
             IXLWorksheet optionsSheet = workbook.Worksheet(hiddenOptionsSheetName);
             string namedRange = $"Options_{Guid.NewGuid():N}";
 
@@ -93,13 +124,11 @@ namespace UIInfrastructure.Excel
                 optionsSheet.Cell(optionsStartRow + i, 1).Value = settings.Options[i].Build().Text;
             }
 
-            // Create named range
-            var optionsRange = optionsSheet.Range(optionsStartRow, 1, optionsStartRow + settings.Options.Count - 1, 1);
+            var optionsRange = optionsSheet.Range(optionsStartRow, 1,
+                optionsStartRow + settings.Options.Count - 1, 1);
             workbook.NamedRanges.Add(namedRange, optionsRange);
 
-            // Create the data validation correctly
-            var dataValidations = currentSheet.DataValidations;
-
+            // Add data validation dropdown
             var validation = cell.DataValidation;
             validation.AllowedValues = XLAllowedValues.List;
             validation.InCellDropdown = true;
