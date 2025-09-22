@@ -32,14 +32,11 @@ jobs:
 
       - name: Add config and copy repo tasks
         run: |
-          echo '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }' > publish/win/config.json
-          mkdir publish/win/Task
-          copy EscapeProjectInfrastructure\Task\tasks.json publish\win\Task\tasks.json
-          echo "@echo off" > publish/win/escapeproject.bat
-          echo "setlocal" >> publish/win/escapeproject.bat
-          echo "set EscapeProjectAbsoluteConfigPath=%%~dp0config.json" >> publish/win/escapeproject.bat
-          echo "%%~dp0EscapeProjectComposition.exe %%*" >> publish/win/escapeproject.bat
-          echo "endlocal" >> publish/win/escapeproject.bat
+          Set-Content -Path publish/win/config.json -Value '{ "TaskDirectoryPath": "./Task", "TaskPlansDirectoryPath": "./TaskPlans" }'
+          New-Item -ItemType Directory -Force -Path publish/win/Task | Out-Null
+          Copy-Item EscapeProjectInfrastructure/Task/tasks.json publish/win/Task/tasks.json -Force
+          Set-Content -Path publish/win/escapeproject.bat -Value "@echo off`r`nsetlocal`r`nset EscapeProjectAbsoluteConfigPath=%~dp0config.json`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
+        shell: pwsh
 
       - name: Test Windows binary
         run: |
