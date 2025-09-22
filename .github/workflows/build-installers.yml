@@ -18,7 +18,7 @@ jobs:
 
   # Windows Build
   build-windows-installer:
-    needs: build-check
+    needs: build-app
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
 
   # Linux Build
   build-linux-installer:
-    needs: build-check
+    needs: build-app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -128,7 +128,7 @@ jobs:
 
   # macOS Build
   build-macos-installer:
-    needs: build-check
+    needs: build-app
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
