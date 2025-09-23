@@ -168,8 +168,6 @@ jobs:
           "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
           EOF
           chmod +x escape-run.sh
-      - name: Copy Task folder
-        run: cp -r Task ./
       - name: Bundle Linux installer
         run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh Task
       - name: Bundle Linux installer
