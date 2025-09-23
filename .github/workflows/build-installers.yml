@@ -168,10 +168,10 @@ jobs:
           "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
           EOF
           chmod +x escape-run.sh
-      - name: Test Linux launcher
-        run: |
-          chmod +x EscapeProject-x86_64.AppImage
-          ./escape-run.sh --help
+      - name: Copy Task folder
+        run: cp -r Task ./
+      - name: Bundle Linux installer
+        run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh Task
       - name: Bundle Linux installer
         run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh
       - name: Upload Linux build (artifact)
@@ -195,6 +195,8 @@ jobs:
           cd win-test
           cmd.exe /c escape-run.bat generate-excel -t Task/tasks.json
           cmd.exe /c escape-run.bat generate-pdf -t Task/tasks.json
+          if (!(Test-Path "TaskPlans/taskPlan.xlsx")) { Write-Error "❌ Missing taskPlan.xlsx" }
+          if (!(Test-Path "TaskPlans/taskPlan.pdf")) { Write-Error "❌ Missing taskPlan.pdf" }
 
   linux-test:
     needs: linux-build
@@ -212,6 +214,8 @@ jobs:
           chmod +x escape-run.sh
           ./escape-run.sh generate-excel -t Task/tasks.json
           ./escape-run.sh generate-pdf -t Task/tasks.json
+          if [ ! -f "TaskPlans/taskPlan.xlsx" ]; then echo "❌ Missing taskPlan.xlsx"; exit 1; fi
+          if [ ! -f "TaskPlans/taskPlan.pdf" ]; then echo "❌ Missing taskPlan.pdf"; exit 1; fi
 
   release:
     needs: [windows-test, linux-test]
