@@ -1,25 +1,33 @@
-﻿using EscapeProjectPresentationCLI.Commands.GenerateTaskPlan;
+﻿using EscapeProjectComposition;
+using EscapeProjectComposition.GenerateTaskPlan;
+using EscapeProjectPresentationCLI.Commands.GenerateTaskPlan;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
-namespace EscapeProjectComposition
+internal class Program
 {
-    internal class Program
+    private static async Task<int> Main(string[] args)
     {
-        private static async Task<int> Main(string[] args)
-        {
-            var app = new CommandApp();
-            app.Configure(config =>
-            {
-                config.AddCommand<GenerateExcelTaskPlanCommand>("generate-excel")
-                    .WithDescription("Generate a task plan in Excel format")
-                    .WithExample(["generate-excel", "-t", "tasks.json"]);
+        var services = new ServiceCollection();
 
-                // Register PDF generator
-                config.AddCommand<GeneratePDFTaskPlanCommand>("generate-pdf")
-                    .WithDescription("Generate a task plan in PDF format")
-                    .WithExample(["generate-pdf", "-t", "tasks.json"]);
-            });
-            return await app.RunAsync(args);
-        }
+        services.AddSingleton<GenerateExcelTaskPlanUseCaseFactory>();
+        services.AddSingleton<GeneratePDFTaskPlanUseCaseFactory>();
+
+        services.AddTransient<GenerateExcelTaskPlanCommand>();
+        services.AddTransient<GeneratePDFTaskPlanCommand>();
+
+        var registrar = new TypeRegistrar(services);
+        var app = new CommandApp(registrar);
+
+        app.Configure(config =>
+        {
+            config.AddCommand<GenerateExcelTaskPlanCommand>("generate-excel")
+                .WithDescription("Generate a task plan in Excel format");
+
+            config.AddCommand<GeneratePDFTaskPlanCommand>("generate-pdf")
+                .WithDescription("Generate a task plan in PDF format");
+        });
+
+        return await app.RunAsync(args);
     }
 }

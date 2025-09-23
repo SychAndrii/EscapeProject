@@ -2,16 +2,16 @@
 using EscapeProjectApplication.UseCases;
 using EscapeProjectInfrastructure.Render;
 using EscapeProjectInfrastructure.Task;
-using UIInfrastructure.Excel;
+using UIInfrastructure.PDF;
 
-namespace EscapeProjectComposition
+namespace EscapeProjectComposition.GenerateTaskPlan
 {
-    public class GenerateExcelTaskPlanUseCaseFactory : GenerateTaskPlanUseCaseFactory
+    public class GeneratePDFTaskPlanUseCaseFactory : GenerateTaskPlanUseCaseFactory
     {
         public GenerateTaskPlanUseCase Create(ConfigurationService configService)
         {
             var repo = new JSONTaskGroupRepository(configService);
-            var renderService = new ExcelRenderService(new ClosedXMLExcelServiceFactory(), configService);
+            var renderService = new PDFRenderService(new ITextPDFServiceFactory(), configService);
             return new GenerateTaskPlanUseCase(repo, renderService);
         }
     }
