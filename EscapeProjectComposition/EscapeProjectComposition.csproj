@@ -19,6 +19,10 @@
     <ProjectReference Include="..\UIApplication\UIApplication.csproj" />
     <ProjectReference Include="..\UIInfrastructure\UIInfrastructure.csproj" />
 	<TrimmerRootAssembly Include="EscapeProjectPresentationCLI" />
+	<TrimmerRootAssembly Include="Spectre.Console.Cli" />
+	<TrimmerRootAssembly Include="Microsoft.Extensions.Configuration" />
+	<TrimmerRootAssembly Include="Microsoft.Extensions.DependencyInjection" />
+	<TrimmerRootAssembly Include="System.Text.Json" />
   </ItemGroup>
 
   <ItemGroup>
