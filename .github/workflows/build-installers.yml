@@ -95,13 +95,75 @@ jobs:
           #!/bin/bash
           set -e
           echo "==> Checking required system libraries..."
-          if ! ldconfig -p 2>/dev/null | grep -q libgdiplus; then
-            echo "❌ libgdiplus missing. Please install with your package manager."
-            exit 1
+          if ! check_libgdiplus_installed; then
+            echo "⚠️  libgdiplus is missing (needed for Excel AdjustToContents)."
+            if command -v apt-get >/dev/null 2>&1; then
+              if sudo -n true 2>/dev/null; then
+                echo "➡ Installing libgdiplus with apt..."
+                sudo apt-get update
+                sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
+              else
+                echo "❌ Cannot auto-install (no sudo). Please run: sudo apt-get install libgdiplus libfuse2"
+                exit 1
+              fi
+            elif command -v yum >/dev/null 2>&1; then
+              if sudo -n true 2>/dev/null; then
+                echo "➡ Installing libgdiplus with yum..."
+                sudo yum install -y libgdiplus fuse
+              else
+                echo "❌ Cannot auto-install (no sudo). Please run: sudo yum install libgdiplus fuse"
+                exit 1
+              fi
+            elif command -v pacman >/dev/null 2>&1; then
+              if sudo -n true 2>/dev/null; then
+                echo "➡ Installing libgdiplus with pacman..."
+                sudo pacman -S --needed --noconfirm libgdiplus fuse2
+              else
+                echo "❌ Cannot auto-install (no sudo). Please run: sudo pacman -S libgdiplus fuse2"
+                exit 1
+              fi
+            else
+              echo "❌ Unsupported Linux distribution. Please install libgdiplus manually using your package manager."
+              exit 1
+            fi
           fi
           echo "✅ Dependencies ready."
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+          if [ ! -f "$SCRIPT_DIR/config.json" ] || [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+            echo "⚠️  Extracting files from AppImage..."
+            mkdir -p "$SCRIPT_DIR/Task"
+            "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" --appimage-extract > /dev/null
+
+            if [ ! -f "$SCRIPT_DIR/Task/tasks.json" ]; then
+              cp squashfs-root/usr/bin/Task/tasks.json "$SCRIPT_DIR/Task/tasks.json"
+            fi
+
+            rm -rf squashfs-root
+          fi
+
           export ESCAPE_PROJECT_BASE_DIRECTORY="$SCRIPT_DIR"
+
+          # Find libdl.so.2 on the host system
+          LIBDL_PATH=$(find /usr/lib /usr/lib64 -maxdepth 2 -name 'libdl.so.2' | head -n1)
+
+          if [ -z "$LIBDL_PATH" ]; then
+              echo "❌ Could not find libdl.so.2 on the host system."
+              exit 1
+          fi
+
+          # Determine its directory
+          LIBDL_DIR=$(dirname "$LIBDL_PATH")
+
+          # Create libdl.so symlink if missing
+          if [ ! -f "$LIBDL_DIR/libdl.so" ]; then
+              echo "➡ Creating symlink: $LIBDL_DIR/libdl.so -> $LIBDL_PATH"
+              sudo ln -sf "$LIBDL_PATH" "$LIBDL_DIR/libdl.so"
+          fi
+
+          # Add to LD_LIBRARY_PATH so the AppImage can see it
+          export LD_LIBRARY_PATH="$LIBDL_DIR:$LD_LIBRARY_PATH"
+
           echo "✅ Environment ready. Starting app..."
           "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
           EOF

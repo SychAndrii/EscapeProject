@@ -143,10 +143,7 @@ namespace UIInfrastructure.Excel
         {
             foreach (var sheet in workbook.Worksheets)
             {
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    sheet.Columns().AdjustToContents(); // This causes a lot of problems on Linux
-                }
+                sheet.Columns().AdjustToContents();
                 sheet.Protect();
             }
 
