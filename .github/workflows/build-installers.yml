@@ -95,10 +95,13 @@ jobs:
           #!/bin/bash
           set -e
           echo "==> Checking required system libraries..."
+          check_libgdiplus_installed() {
+              ldconfig -p 2>/dev/null | grep -q libgdiplus
+          }
           if ! check_libgdiplus_installed; then
             echo "⚠️  libgdiplus is missing (needed for Excel AdjustToContents)."
             if command -v apt-get >/dev/null 2>&1; then
-              if sudo -n true 2>/dev/null; then
+              if sudo -v; then
                 echo "➡ Installing libgdiplus with apt..."
                 sudo apt-get update
                 sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
@@ -107,7 +110,7 @@ jobs:
                 exit 1
               fi
             elif command -v yum >/dev/null 2>&1; then
-              if sudo -n true 2>/dev/null; then
+              if sudo -v; then
                 echo "➡ Installing libgdiplus with yum..."
                 sudo yum install -y libgdiplus fuse
               else
@@ -115,7 +118,7 @@ jobs:
                 exit 1
               fi
             elif command -v pacman >/dev/null 2>&1; then
-              if sudo -n true 2>/dev/null; then
+              if sudo -v; then
                 echo "➡ Installing libgdiplus with pacman..."
                 sudo pacman -S --needed --noconfirm libgdiplus fuse2
               else
@@ -178,23 +181,23 @@ jobs:
           name: linux-installer
           path: linux-installer.zip
 
-  windows-test:
-    needs: windows-build
-    runs-on: windows-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: windows-installer
-          path: .
-      - name: Extract Windows build
-        run: Expand-Archive windows-installer.zip -DestinationPath win-test
-      - name: Run tests
-        run: |
-          cd win-test
-          cmd.exe /c escape-run.bat generate-excel -t Task/tasks.json
-          cmd.exe /c escape-run.bat generate-pdf -t Task/tasks.json
-          if (!(Test-Path "TaskPlans/taskPlan.xlsx")) { Write-Error "❌ Missing taskPlan.xlsx" }
-          if (!(Test-Path "TaskPlans/taskPlan.pdf")) { Write-Error "❌ Missing taskPlan.pdf" }
+    windows-test:
+      needs: windows-build
+      runs-on: windows-latest
+      steps:
+        - uses: actions/download-artifact@v4
+          with:
+            name: windows-installer
+            path: .
+        - name: Extract Windows build
+          run: Expand-Archive windows-installer.zip -DestinationPath win-test
+        - name: Run tests
+          run: |
+            cd win-test
+            cmd.exe /c escape-run.bat generate-excel -t Task/tasks.json
+            cmd.exe /c escape-run.bat generate-pdf -t Task/tasks.json
+            if (!(Test-Path "TaskPlans/taskPlan.xlsx")) { Write-Error "❌ Missing taskPlan.xlsx" }
+            if (!(Test-Path "TaskPlans/taskPlan.pdf")) { Write-Error "❌ Missing taskPlan.pdf" }
 
   linux-test:
     needs: linux-build
