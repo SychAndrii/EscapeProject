@@ -13,6 +13,7 @@
   <ItemGroup>
     <Content Include="Task\tasks.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
 
