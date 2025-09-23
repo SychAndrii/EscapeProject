@@ -2,8 +2,6 @@ name: Build Installers
 
 on:
   push:
-    tags:
-      - 'v*'
 
 permissions:
   contents: write
@@ -159,7 +157,7 @@ jobs:
             elif command -v pacman >/dev/null 2>&1; then
               if sudo -n true 2>/dev/null; then
                 echo "➡ Installing libgdiplus with pacman..."
-                sudo pacman -Sy --noconfirm libgdiplus fuse2
+                sudo pacman -S --needed --noconfirm libgdiplus fuse2
               else
                 echo "❌ Cannot auto-install (no sudo). Please run: sudo pacman -S libgdiplus fuse2"
                 exit 1
@@ -190,6 +188,27 @@ jobs:
           fi
 
           export EscapeProjectAbsoluteConfigPath="$SCRIPT_DIR/config.json"
+
+          # Find libdl.so.2 on the host system
+          LIBDL_PATH=$(find /usr/lib /usr/lib64 -maxdepth 2 -name 'libdl.so.2' | head -n1)
+
+          if [ -z "$LIBDL_PATH" ]; then
+              echo "❌ Could not find libdl.so.2 on the host system."
+              exit 1
+          fi
+
+          # Determine its directory
+          LIBDL_DIR=$(dirname "$LIBDL_PATH")
+
+          # Create libdl.so symlink if missing
+          if [ ! -f "$LIBDL_DIR/libdl.so" ]; then
+              echo "➡ Creating symlink: $LIBDL_DIR/libdl.so -> $LIBDL_PATH"
+              sudo ln -sf "$LIBDL_PATH" "$LIBDL_DIR/libdl.so"
+          fi
+
+          # Add to LD_LIBRARY_PATH so the AppImage can see it
+          export LD_LIBRARY_PATH="$LIBDL_DIR:$LD_LIBRARY_PATH"
+
           echo "✅ Environment ready. Starting app..."
           "$SCRIPT_DIR/EscapeProject-x86_64.AppImage" "$@"
           EOF
