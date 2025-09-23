@@ -1,6 +1,7 @@
 ﻿using EscapeProjectComposition;
-using EscapeProjectComposition.GenerateTaskPlan;
+using EscapeProjectComposition.GenerateTaskPlan.FactoryProviders;
 using EscapeProjectPresentationCLI.Commands.GenerateTaskPlan;
+using EscapeProjectPresentationCLI.UseCaseFactoryProviders.GenerateTaskPlan;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
@@ -10,8 +11,8 @@ internal class Program
     {
         var services = new ServiceCollection();
 
-        services.AddSingleton<GenerateExcelTaskPlanUseCaseFactory>();
-        services.AddSingleton<GeneratePDFTaskPlanUseCaseFactory>();
+        services.AddTransient<IGenerateExcelTaskPlanUseCaseFactoryProvider, GenerateExcelTaskPlanUseCaseFactoryProvider>();
+        services.AddTransient<IGeneratePDFTaskPlanUseCaseFactoryProvider, GeneratePDFTaskPlanUseCaseFactoryProvider>();
 
         services.AddTransient<GenerateExcelTaskPlanCommand>();
         services.AddTransient<GeneratePDFTaskPlanCommand>();

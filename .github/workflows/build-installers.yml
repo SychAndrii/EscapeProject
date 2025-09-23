@@ -2,8 +2,8 @@ name: Build Installers
 
 on:
   push:
-    branches: ["**"]   # ✅ run builds on every push, all branches
-    tags: ["v*"]       # ✅ also trigger for version tags
+    branches: ["**"]
+    tags: ["v*"]
 
 permissions:
   contents: write

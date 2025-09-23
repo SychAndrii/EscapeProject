@@ -1,12 +1,12 @@
-﻿using EscapeProjectApplication.UseCases;
-using EscapeProjectPresentationCLI.Settings.GenerateTaskPlan;
+﻿using EscapeProjectPresentationCLI.Settings.GenerateTaskPlan;
+using EscapeProjectPresentationCLI.UseCaseFactoryProviders.GenerateTaskPlan;
 using Spectre.Console.Cli;
 
 namespace EscapeProjectPresentationCLI.Commands.GenerateTaskPlan
 {
     public class GeneratePDFTaskPlanCommand : GenerateTaskPlanCommand<GeneratePDFTaskPlanSettings>
     {
-        public GeneratePDFTaskPlanCommand(GenerateTaskPlanUseCaseFactory factory) : base(factory)
+        public GeneratePDFTaskPlanCommand(IGeneratePDFTaskPlanUseCaseFactoryProvider factoryProvider) : base(factoryProvider.GetFactory())
         {
 
         }
