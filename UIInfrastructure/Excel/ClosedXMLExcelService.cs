@@ -1,4 +1,5 @@
-﻿using ClosedXML.Excel;
+﻿using System.Runtime.InteropServices;
+using ClosedXML.Excel;
 using UIApplication.Excel;
 using UIDomain.Select;
 using UIDomain.Text;
@@ -142,7 +143,10 @@ namespace UIInfrastructure.Excel
         {
             foreach (var sheet in workbook.Worksheets)
             {
-                sheet.Columns().AdjustToContents();
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    sheet.Columns().AdjustToContents(); // This causes a lot of problems on Linux
+                }
                 sheet.Protect();
             }
 
