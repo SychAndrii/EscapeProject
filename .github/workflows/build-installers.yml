@@ -70,7 +70,7 @@ jobs:
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
       - name: Publish self-contained for Linux
-        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -o publish/linux
+        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r linux-x64 --self-contained true -o publish/linux
       - name: Package as AppImage
         run: |
           mkdir -p AppDir/usr/bin
