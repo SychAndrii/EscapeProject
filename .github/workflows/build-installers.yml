@@ -29,19 +29,32 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Publish self-contained single-file for Windows
-        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win
+        run: dotnet publish EscapeProjectComposition/EscapeProjectComposition.csproj `
+              -c Release `
+              -r win-x64 `
+              --self-contained true `
+              -p:PublishSingleFile=true `
+              -p:IncludeAllContentForSelfExtract=true `
+              -p:EnableCompressionInSingleFile=true `
+              -p:PublishTrimmed=false `
+              -o publish/win
+
       - name: Create Windows launcher
         run: |
           Set-Content -Path publish/win/escape-run.bat -Value "@echo off`r`nsetlocal`r`nset ESCAPE_PROJECT_BASE_DIRECTORY=%~dp0`r`n%~dp0EscapeProjectComposition.exe %*`r`nendlocal"
         shell: pwsh
+
       - name: Test Windows launcher
         shell: pwsh
         run: |
           cd publish/win
           cmd.exe /c escape-run.bat --help
+
       - name: Bundle Windows build
         run: powershell Compress-Archive -Path publish/win/* -DestinationPath windows-installer.zip
+
       - name: Upload Windows build (artifact)
         uses: actions/upload-artifact@v4
         with:
