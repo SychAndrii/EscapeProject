@@ -180,8 +180,41 @@ jobs:
           name: linux-installer
           path: linux-installer.zip
 
+  windows-test:
+    needs: windows-build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: .
+      - name: Extract Windows build
+        run: Expand-Archive windows-installer.zip -DestinationPath win-test
+      - name: Run tests
+        run: |
+          cd win-test
+          cmd.exe /c escape-run.bat generate-excel -t Task/tasks.json
+          cmd.exe /c escape-run.bat generate-pdf -t Task/tasks.json
+
+  linux-test:
+    needs: linux-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-installer
+          path: .
+      - name: Extract Linux build
+        run: unzip linux-installer.zip -d linux-test
+      - name: Run tests
+        run: |
+          cd linux-test
+          chmod +x escape-run.sh
+          ./escape-run.sh generate-excel -t Task/tasks.json
+          ./escape-run.sh generate-pdf -t Task/tasks.json
+
   release:
-    needs: [windows-build, linux-build]
+    needs: [windows-test, linux-test]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v') && github.event.base_ref == 'refs/heads/main'
     steps:
