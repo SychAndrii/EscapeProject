@@ -172,8 +172,6 @@ jobs:
           EOF
           chmod +x escape-run.sh
       - name: Bundle Linux installer
-        run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh Task
-      - name: Bundle Linux installer
         run: zip -r linux-installer.zip EscapeProject-x86_64.AppImage escape-run.sh
       - name: Upload Linux build (artifact)
         uses: actions/upload-artifact@v4
@@ -181,23 +179,23 @@ jobs:
           name: linux-installer
           path: linux-installer.zip
 
-    windows-test:
-      needs: windows-build
-      runs-on: windows-latest
-      steps:
-        - uses: actions/download-artifact@v4
-          with:
-            name: windows-installer
-            path: .
-        - name: Extract Windows build
-          run: Expand-Archive windows-installer.zip -DestinationPath win-test
-        - name: Run tests
-          run: |
-            cd win-test
-            cmd.exe /c escape-run.bat generate-excel -t Task/tasks.json
-            cmd.exe /c escape-run.bat generate-pdf -t Task/tasks.json
-            if (!(Test-Path "TaskPlans/taskPlan.xlsx")) { Write-Error "❌ Missing taskPlan.xlsx" }
-            if (!(Test-Path "TaskPlans/taskPlan.pdf")) { Write-Error "❌ Missing taskPlan.pdf" }
+  windows-test:
+    needs: windows-build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: .
+      - name: Extract Windows build
+        run: Expand-Archive windows-installer.zip -DestinationPath win-test
+      - name: Run tests
+        run: |
+          cd win-test
+          cmd.exe /c escape-run.bat generate-excel -t Task/tasks.json
+          cmd.exe /c escape-run.bat generate-pdf -t Task/tasks.json
+          if (!(Test-Path "TaskPlans/taskPlan.xlsx")) { Write-Error "❌ Missing taskPlan.xlsx" }
+          if (!(Test-Path "TaskPlans/taskPlan.pdf")) { Write-Error "❌ Missing taskPlan.pdf" }
 
   linux-test:
     needs: linux-build
