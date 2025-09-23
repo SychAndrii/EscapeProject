@@ -2,8 +2,9 @@
   "profiles": {
     "EscapeProjectComposition": {
       "commandName": "Project",
+      "commandLineArgs": "generate-excel -h",
       "environmentVariables": {
-        "EscapeProjectAbsoluteConfigPath": "C:\\Users\\andri\\Desktop\\Escape\\EscapeProjectComposition\\bin\\Debug\\net8.0\\config.json"
+        "ESCAPE_PROJECT_BASE_DIRECTORY": "C:\\Users\\andri\\Desktop\\Escape\\EscapeProjectComposition\\bin\\Debug\\net8.0"
       }
     }
   }
