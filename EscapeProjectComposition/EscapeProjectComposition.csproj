@@ -18,6 +18,7 @@
     <ProjectReference Include="..\EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj" />
     <ProjectReference Include="..\UIApplication\UIApplication.csproj" />
     <ProjectReference Include="..\UIInfrastructure\UIInfrastructure.csproj" />
+	<TrimmerRootAssembly Include="EscapeProjectPresentationCLI" />
   </ItemGroup>
 
   <ItemGroup>
