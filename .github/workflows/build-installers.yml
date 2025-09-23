@@ -106,7 +106,11 @@ jobs:
         run: |
           mkdir -p AppDir/usr/bin
           rsync -av publish/linux/ AppDir/usr/bin/
-          ln -s /lib/x86_64-linux-gnu/libdl.so.2 AppDir/usr/bin/libdl.so || true
+
+          # ✅ Remove forbidden system libraries (must use host versions)
+          rm -f AppDir/usr/bin/libdl*      || true
+          rm -f AppDir/usr/bin/libc.so*    || true
+          rm -f AppDir/usr/bin/libpthread* || true
 
           echo '#!/bin/sh
           HERE=$(dirname "$(readlink -f "$0")")
@@ -129,19 +133,45 @@ jobs:
           cat << 'EOF' > escape-run.sh
           #!/bin/bash
           set -e
-          echo "==> Installing required system libraries..."
-          if command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
-          elif command -v yum >/dev/null 2>&1; then
-            sudo yum install -y libgdiplus fuse
-          elif command -v pacman >/dev/null 2>&1; then
-            sudo pacman -Sy --noconfirm libgdiplus fuse2
-          else
-            echo "Unsupported Linux distribution. Please install libgdiplus and fuse manually."
-            exit 1
+
+          check_libgdiplus_installed() {
+            ldconfig -p 2>/dev/null | grep -q libgdiplus
+          }
+
+          echo "==> Checking required system libraries..."
+          if ! check_libgdiplus_installed; then
+            echo "⚠️  libgdiplus is missing (needed for Excel AdjustToContents)."
+            if command -v apt-get >/dev/null 2>&1; then
+              if sudo -n true 2>/dev/null; then
+                echo "➡ Installing libgdiplus with apt..."
+                sudo apt-get update
+                sudo apt-get install -y libgdiplus libfuse2 || sudo apt-get install -y libgdiplus libfuse2t64
+              else
+                echo "❌ Cannot auto-install (no sudo). Please run: sudo apt-get install libgdiplus libfuse2"
+                exit 1
+              fi
+            elif command -v yum >/dev/null 2>&1; then
+              if sudo -n true 2>/dev/null; then
+                echo "➡ Installing libgdiplus with yum..."
+                sudo yum install -y libgdiplus fuse
+              else
+                echo "❌ Cannot auto-install (no sudo). Please run: sudo yum install libgdiplus fuse"
+                exit 1
+              fi
+            elif command -v pacman >/dev/null 2>&1; then
+              if sudo -n true 2>/dev/null; then
+                echo "➡ Installing libgdiplus with pacman..."
+                sudo pacman -Sy --noconfirm libgdiplus fuse2
+              else
+                echo "❌ Cannot auto-install (no sudo). Please run: sudo pacman -S libgdiplus fuse2"
+                exit 1
+              fi
+            else
+              echo "❌ Unsupported Linux distribution. Please install libgdiplus manually using your package manager."
+              exit 1
+            fi
           fi
-          echo "✅ Dependencies installed."
+          echo "✅ Dependencies ready."
 
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
