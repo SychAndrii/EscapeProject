@@ -107,10 +107,8 @@ jobs:
           mkdir -p AppDir/usr/bin
           rsync -av publish/linux/ AppDir/usr/bin/
 
-          # ✅ Remove forbidden system libraries (must use host versions)
-          rm -f AppDir/usr/bin/libdl*      || true
-          rm -f AppDir/usr/bin/libc.so*    || true
-          rm -f AppDir/usr/bin/libpthread* || true
+          # ✅ Remove forbidden system libraries anywhere in AppDir
+          find AppDir -maxdepth 3 -type f \( -name "libdl*" -o -name "libc.so*" -o -name "libpthread*" \) -print -delete
 
           echo '#!/bin/sh
           HERE=$(dirname "$(readlink -f "$0")")
@@ -210,38 +208,3 @@ jobs:
         with:
           name: linux-installer
           path: linux-installer.zip
-
-  release:
-    needs: [windows-build, linux-build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download Windows installer artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-installer
-          path: artifacts
-
-      - name: Download Linux installer artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-installer
-          path: artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            🚀 First release of Escape Project.
-
-            Includes:
-            - ✅ Windows Installer (ZIP)
-            - ✅ Linux AppImage Installer (ZIP)
-
-            You can modify tasks inside `tasks.json` and regenerate PDF + Excel using the launchers.
-          files: |
-            artifacts/windows-installer.zip
-            artifacts/linux-installer.zip
