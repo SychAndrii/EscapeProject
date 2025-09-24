@@ -1,11 +1,11 @@
 # Using Escape Project as a CLI tool
 
+[← Back to Documentation Index](../README.md)
+
 EscapeProject is distributed as ready-to-use installers for Windows and Linux.  
 Follow the steps below to set it up and run the CLI tool.
 
 ---
-
-[← Back to Documentation Index](./README.md)
 
 ## Table of Contents
 
