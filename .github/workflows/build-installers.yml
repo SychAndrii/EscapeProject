@@ -219,16 +219,31 @@ jobs:
   release:
     needs: [windows-test, linux-test]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') && github.event.base_ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch full history so we can check ancestry
+
+      - name: Ensure tag commit is on main
+        run: |
+          echo "🔍 Checking if $GITHUB_SHA is on main..."
+          if ! git merge-base --is-ancestor $GITHUB_SHA origin/main; then
+            echo "❌ Tag $GITHUB_REF does not point to a commit on main!"
+            exit 1
+          fi
+          echo "✅ Tag is on main, continuing..."
+
       - uses: actions/download-artifact@v4
         with:
           name: windows-installer
           path: .
+
       - uses: actions/download-artifact@v4
         with:
           name: linux-installer
           path: .
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
