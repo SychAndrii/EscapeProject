@@ -5,6 +5,8 @@ Follow the steps below to set it up and run the CLI tool.
 
 ---
 
+[← Back to Documentation Index](./README.md)
+
 ## Table of Contents
 
 - [Installation](#installation)
