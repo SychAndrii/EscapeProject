@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using BaseDomain;
 using EscapeProject.Task;
 using EscapeProjectApplication.Services.Configuration;
 using EscapeProjectDomain;
@@ -13,11 +12,6 @@ namespace EscapeProjectInfrastructure.Task
         public JSONTaskGroupRepository(ConfigurationService configService)
         {
             this.configService = configService;
-        }
-
-        public IUnitOfWork UnitOfWork
-        {
-            get;
         }
 
         public async Task<List<TaskGroupAggregate>> GetTaskGroups()
