@@ -16,7 +16,7 @@
       - [Example JSON](#example-json)
 
 ## Why was this project created?
-
+[See details](./docs/README.md)
 During my self-improvement journey I stumbled upon a couple of problems:
 
 1. I wanted to use a task management app to boost my productivity. However, all existing apps did not click with me. They were either overcomplicated or required a paid subscription. Many apps include features you don’t even need by default, which makes their UI overwhelming.  
