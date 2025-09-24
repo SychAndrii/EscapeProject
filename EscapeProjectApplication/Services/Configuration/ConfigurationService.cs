@@ -1,4 +1,4 @@
-﻿namespace EscapeProjectInfrastructure.Configuration
+﻿namespace EscapeProjectApplication.Services.Configuration
 {
     public interface ConfigurationService
     {

@@ -1,57 +1,53 @@
-﻿using EscapeProjectApplication.Services;
-using EscapeProjectApplication.UseCases;
-using EscapeProjectDomain;
-using EscapeProjectInfrastructure.Configuration;
-using EscapeProjectInfrastructure.Render;
-using EscapeProjectInfrastructure.Task;
-using EscapeProjectPresentationCLI;
-using UIApplication.Excel;
-using UIApplication.PDF;
-using UIInfrastructure.Excel;
-using UIInfrastructure.PDF;
+﻿using System.Runtime.InteropServices;
+using EscapeProjectComposition;
+using EscapeProjectComposition.GenerateTaskPlan.Factories;
+using EscapeProjectComposition.GenerateTaskPlan.FactoryProviders;
+using EscapeProjectPresentationCLI.Commands.GenerateTaskPlan;
+using EscapeProjectPresentationCLI.UseCaseFactoryProviders.GenerateTaskPlan;
+using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console.Cli;
 
-namespace EscapeProjectComposition
+internal class Program
 {
-    internal class Program
+    private static async Task<int> Main(string[] args)
     {
-        private static async Task Main(string[] args)
+        var services = new ServiceCollection();
+
+        services.AddTransient<GenerateExcelTaskPlanUseCaseFactory>();
+        services.AddTransient<GeneratePDFTaskPlanUseCaseFactory>();
+
+        // Register providers
+        services.AddTransient<IGenerateExcelTaskPlanUseCaseFactoryProvider, GenerateExcelTaskPlanUseCaseFactoryProvider>();
+        services.AddTransient<IGeneratePDFTaskPlanUseCaseFactoryProvider, GeneratePDFTaskPlanUseCaseFactoryProvider>();
+
+        // Register commands
+        services.AddTransient<GenerateExcelTaskPlanCommand>();
+        services.AddTransient<GeneratePDFTaskPlanCommand>();
+
+        // Wrap in Spectre registrar
+        var registrar = new TypeRegistrar(services);
+        var app = new CommandApp(registrar);
+
+        app.Configure(config =>
         {
-            string configPath = ReadConfigPathFromEnvVariable();
+            config.PropagateExceptions();
 
-            var configService = new JSONConfigurationService(configPath);
-            TaskGroupRepository taskGroupRepository = new JSONTaskGroupRepository(configService);
-
-            await GeneratePDF(taskGroupRepository, configService);
-            await GenerateExcel(taskGroupRepository, configService);
-        }
-
-        private static string ReadConfigPathFromEnvVariable()
-        {
-            string? configPath = Environment.GetEnvironmentVariable("EscapeProjectAbsoluteConfigPath");
-            if (string.IsNullOrEmpty(configPath))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Console.Error.WriteLine("Environment variable 'EscapeProjectAbsoluteConfigPath' is not set.");
-                Environment.Exit(1);
+                config.SetApplicationName("escape-run.bat");
             }
-            return configPath;
-        }
+            else
+            {
+                config.SetApplicationName("escape-run.sh");
+            }
 
-        private async static Task GeneratePDF(TaskGroupRepository repository, ConfigurationService configService)
-        {
-            PDFServiceFactory pdfServiceFactory = new ITextPDFServiceFactory();
-            RenderService renderServicePDF = new PDFRenderService(pdfServiceFactory, configService);
-            GenerateTaskPlanUseCase useCasePDF = new GenerateTaskPlanUseCase(repository, renderServicePDF);
-            TasksController tasksControllerPDF = new TasksController(useCasePDF);
-            await tasksControllerPDF.GenerateTaskPlan();
-        }
+            config.AddCommand<GenerateExcelTaskPlanCommand>("generate-excel")
+                  .WithExample(new[] { "generate-excel", "-h" });
 
-        private async static Task GenerateExcel(TaskGroupRepository repository, ConfigurationService configService)
-        {
-            ExcelServiceFactory excelServiceFactory = new ClosedXMLExcelServiceFactory();
-            RenderService renderServiceExcel = new ExcelRenderService(excelServiceFactory, configService);
-            GenerateTaskPlanUseCase useCaseExcel = new GenerateTaskPlanUseCase(repository, renderServiceExcel);
-            TasksController tasksControllerExcel = new TasksController(useCaseExcel);
-            await tasksControllerExcel.GenerateTaskPlan();
-        }
+            config.AddCommand<GeneratePDFTaskPlanCommand>("generate-pdf")
+                  .WithExample(new[] { "generate-pdf", "-h" });
+        });
+
+        return await app.RunAsync(args);
     }
 }

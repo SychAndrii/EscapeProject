@@ -1,7 +1,7 @@
 ﻿using BaseDomain;
 using EscapeProjectApplication.Services;
+using EscapeProjectApplication.Services.Configuration;
 using EscapeProjectDomain;
-using EscapeProjectInfrastructure.Configuration;
 using UIApplication.PDF;
 using UIDomain.Checkbox;
 using UIDomain.Text;

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using BaseDomain;
 using EscapeProject.Task;
+using EscapeProjectApplication.Services.Configuration;
 using EscapeProjectDomain;
-using EscapeProjectInfrastructure.Configuration;
 
 namespace EscapeProjectInfrastructure.Task
 {

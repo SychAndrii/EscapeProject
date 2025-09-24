@@ -1,25 +1,60 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EscapeProjectApplication\EscapeProjectApplication.csproj" />
-    <ProjectReference Include="..\EscapeProjectDomain\EscapeProjectDomain.csproj" />
-    <ProjectReference Include="..\EscapeProjectInfrastructure\EscapeProjectInfrastructure.csproj" />
-    <ProjectReference Include="..\EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj" />
-    <ProjectReference Include="..\UIApplication\UIApplication.csproj" />
-    <ProjectReference Include="..\UIInfrastructure\UIInfrastructure.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<PublishTrimmed>false</PublishTrimmed>
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Update="config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\EscapeProjectApplication\EscapeProjectApplication.csproj" />
+		<ProjectReference Include="..\EscapeProjectDomain\EscapeProjectDomain.csproj" />
+		<ProjectReference Include="..\EscapeProjectInfrastructure\EscapeProjectInfrastructure.csproj" />
+		<ProjectReference Include="..\EscapeProjectPresentation\EscapeProjectPresentationCLI.csproj" />
+		<ProjectReference Include="..\UIApplication\UIApplication.csproj" />
+		<ProjectReference Include="..\UIInfrastructure\UIInfrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\EscapeProjectInfrastructure\Task\tasks.json" Link="Task\tasks.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="RemoveSatelliteAssemblies" AfterTargets="Publish">
+		<!-- Remove language folders -->
+		<RemoveDir Directories="$(PublishDir)de" />
+		<RemoveDir Directories="$(PublishDir)es" />
+		<RemoveDir Directories="$(PublishDir)fr" />
+		<RemoveDir Directories="$(PublishDir)it" />
+		<RemoveDir Directories="$(PublishDir)ja" />
+		<RemoveDir Directories="$(PublishDir)ko" />
+		<RemoveDir Directories="$(PublishDir)pt" />
+		<RemoveDir Directories="$(PublishDir)ru" />
+		<RemoveDir Directories="$(PublishDir)sv" />
+		<RemoveDir Directories="$(PublishDir)zh-Hans" />
+
+		<!-- Remove PDB files -->
+		<ItemGroup>
+			<PdbFiles Include="$(PublishDir)**\*.pdb" />
+		</ItemGroup>
+		<Delete Files="@(PdbFiles)" />
+	</Target>
 
 </Project>
