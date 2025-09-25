@@ -29,20 +29,18 @@ namespace EscapeProjectInfrastructure.Task
                 Converters = { new StrictDateTimeConverter(), new NormalizedStringJsonConverter() }
             };
 
-            // Deserialize to Dictionary<string, List<TaskEntity>>
-            Dictionary<string, List<TaskEntity>>? rawGroups =
-                JsonSerializer.Deserialize<Dictionary<string, List<TaskEntity>>>(json, options);
+            var dtoGroups = JsonSerializer.Deserialize<Dictionary<string, List<TaskEntityDto>>>(json, options);
 
-            if (rawGroups == null)
+            if (dtoGroups == null)
             {
                 throw new InvalidDataException("Failed to parse JSON task groups.");
             }
 
-            // Convert to List<TaskGroupAggregate>
             var result = new List<TaskGroupAggregate>();
-            foreach (var (key, taskList) in rawGroups)
+            foreach (var (key, taskDtos) in dtoGroups)
             {
-                result.Add(new TaskGroupAggregate(key, taskList));
+                var tasks = taskDtos.Select(TaskEntityMapper.ToDomain).ToList();
+                result.Add(new TaskGroupAggregate(key, tasks));
             }
 
             return result;
