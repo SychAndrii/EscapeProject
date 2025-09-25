@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   app-build:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +22,6 @@ jobs:
         run: dotnet build --configuration Release
 
   windows-build:
-    if: github.event_name == 'pull_request'
     needs: app-build
     runs-on: windows-latest
     steps:
@@ -57,7 +55,6 @@ jobs:
           path: windows-installer.zip
 
   linux-build:
-    if: github.event_name == 'pull_request'
     needs: app-build
     runs-on: ubuntu-latest
     steps:
@@ -184,7 +181,6 @@ jobs:
           path: linux-installer.zip
 
   windows-test:
-    if: github.event_name == 'pull_request'
     needs: windows-build
     runs-on: windows-latest
     steps:
@@ -203,7 +199,6 @@ jobs:
           if (!(Test-Path "TaskPlans/taskPlan.pdf")) { Write-Error "❌ Missing taskPlan.pdf" }
 
   linux-test:
-    if: github.event_name == 'pull_request'
     needs: linux-build
     runs-on: ubuntu-latest
     steps:
