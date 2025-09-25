@@ -229,7 +229,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # fetch full history so we can check ancestry
+          fetch-depth: 0
 
       - name: Ensure tag commit is on main
         run: |
@@ -240,15 +240,29 @@ jobs:
           fi
           echo "✅ Tag is on main, continuing..."
 
-      - uses: actions/download-artifact@v4
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
         with:
           name: windows-installer
           path: .
 
-      - uses: actions/download-artifact@v4
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
         with:
           name: linux-installer
           path: .
+
+      - name: Verify artifacts exist
+        run: |
+          if [ ! -f "windows-installer.zip" ]; then
+            echo "❌ Missing windows-installer.zip artifact!"
+            exit 1
+          fi
+          if [ ! -f "linux-installer.zip" ]; then
+            echo "❌ Missing linux-installer.zip artifact!"
+            exit 1
+          fi
+          echo "✅ Both artifacts found, continuing..."
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
