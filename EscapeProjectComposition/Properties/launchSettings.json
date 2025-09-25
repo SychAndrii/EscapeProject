@@ -2,7 +2,7 @@
   "profiles": {
     "EscapeProjectComposition": {
       "commandName": "Project",
-      "commandLineArgs": "generate-excel -t Task/tasks.json",
+      "commandLineArgs": "generate-pdf -t Task/tasks.json",
       "environmentVariables": {
         "ESCAPE_PROJECT_BASE_DIRECTORY": "C:\\Users\\andri\\Desktop\\Escape\\EscapeProjectComposition\\bin\\Debug\\net8.0"
       }

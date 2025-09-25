@@ -1,14 +1,18 @@
 {
     "Thursday": [
         {
-            "name": "Meditation",
             "from": "2025-09-18T06:30:00",
             "until": null
         },
         {
             "name": "Gym",
             "from": "2025-09-18T07:00:00",
-            "until": null
+            "until": null,
+            "subtasks": [
+                {
+                    
+                }
+            ]
         },
         {
             "name": "Breakfast",

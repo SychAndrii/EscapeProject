@@ -17,9 +17,9 @@ namespace EscapeProjectDomain
 
             if (subtasks != null)
             {
-                if (!subtasks.Any())
+                if (subtasks.Count() == 0)
                 {
-                    throw new InvalidDataException("If subtasks enumerable is specified, it has to contain at least one task");
+                    throw new InvalidDataException("If subtasks are specified, there has to be at least one subtask");
                 }
                 Subtasks = subtasks.ToImmutableList();
             }
