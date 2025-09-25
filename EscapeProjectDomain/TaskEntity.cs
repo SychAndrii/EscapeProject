@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Immutable;
+using System.Data;
 using BaseDomain;
 
 namespace EscapeProjectDomain
@@ -8,11 +9,25 @@ namespace EscapeProjectDomain
         private DateTime? from;
         private DateTime? until;
 
-        public TaskEntity(NormalizedString name, DateTime? from, DateTime? until)
+        public TaskEntity(NormalizedString name, DateTime? from, DateTime? until, IEnumerable<TaskEntity>? subtasks = null)
         {
             Name = name;
             From = from;
             Until = until;
+
+            if (subtasks != null)
+            {
+                if (!subtasks.Any())
+                {
+                    throw new InvalidDataException("If subtasks enumerable is specified, it has to contain at least one task");
+                }
+                Subtasks = subtasks.ToImmutableList();
+            }
+        }
+
+        public ImmutableList<TaskEntity>? Subtasks
+        {
+            get;
         }
 
         public NormalizedString Name
@@ -46,15 +61,25 @@ namespace EscapeProjectDomain
             }
         }
 
-        public TimeSpan? Duration => From != null && Until != null
-            ? Until.Value - From.Value
-            : null;
+        public TimeSpan? Duration
+        {
+            get
+            {
+                DateTime? effectiveFrom = From ?? Subtasks?.Where(s => s.From != null).Min(s => s.From);
+                DateTime? effectiveUntil = Until ?? Subtasks?.Where(s => s.Until != null).Max(s => s.Until);
+
+                return effectiveFrom != null && effectiveUntil != null
+                    ? effectiveUntil.Value - effectiveFrom.Value
+                    : null;
+            }
+        }
 
         protected override IEnumerable<object?> GetEqualityComponents()
         {
             yield return Name;
             yield return From;
             yield return Until;
+            yield return Subtasks;
         }
     }
 }
