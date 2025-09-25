@@ -41,9 +41,9 @@ Both PDF and Excel formats ensure that your tasks stay **accessible, editable, a
 
 ## Plans for the future
 
-1. Rewrite README to serve as the foundation of comprehensive documentation.  
-2. Add cross-platform UI to create tasks instead of manually editing JSON file.
-3. Unit test BaseDomain layer.
+1. Add support of sub-tasks
+2. Unit test BaseDomain layer.
+3. Add cross-platform UI to create tasks instead of manually editing JSON file.
 
 ---
 
