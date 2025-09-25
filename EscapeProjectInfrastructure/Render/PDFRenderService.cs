@@ -1,5 +1,4 @@
 ﻿using BaseDomain;
-using EscapeProjectApplication.Services;
 using EscapeProjectApplication.Services.Configuration;
 using EscapeProjectDomain;
 using UIApplication.PDF;
@@ -8,7 +7,7 @@ using UIDomain.Text;
 
 namespace EscapeProjectInfrastructure.Render
 {
-    public class PDFRenderService : RenderService
+    public class PDFRenderService : TaskRenderService
     {
         private readonly PDFServiceFactory pdfServiceFactory;
         private readonly ConfigurationService configService;
@@ -20,7 +19,7 @@ namespace EscapeProjectInfrastructure.Render
             this.configService = configService;
         }
 
-        public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
+        public override void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
             // Ensure the TaskPlans directory exists
             string taskPlansDir = configService.Settings.TaskPlansDirectoryPath;
@@ -58,7 +57,7 @@ namespace EscapeProjectInfrastructure.Render
                 foreach (TaskEntity task in tasksForGroup)
                 {
                     var checkboxText = task.Name;
-                    var durationText = task.Duration();
+                    var durationText = GetFormattedDuration(task);
 
                     if (durationText != null)
                     {

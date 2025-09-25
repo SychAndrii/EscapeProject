@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Text;
 using BaseDomain;
 
 namespace EscapeProjectDomain
@@ -47,37 +46,9 @@ namespace EscapeProjectDomain
             }
         }
 
-        public NormalizedString? Duration()
-        {
-            if (From != null && Until != null)
-            {
-                var duration = Until.Value - From.Value;
-                var sb = new StringBuilder();
-
-                if (duration.Days > 0)
-                {
-                    sb.Append($"{duration.Days}d ");
-                }
-
-                if (duration.Hours > 0)
-                {
-                    sb.Append($"{duration.Hours}h ");
-                }
-
-                if (duration.Minutes > 0)
-                {
-                    sb.Append($"{duration.Minutes}m ");
-                }
-
-                if (duration.Seconds > 0)
-                {
-                    sb.Append($"{duration.Seconds}s ");
-                }
-
-                return sb.ToString().TrimEnd();
-            }
-            return null;
-        }
+        public TimeSpan? Duration => From != null && Until != null
+            ? Until.Value - From.Value
+            : null;
 
         public NormalizedString? Range()
         {

@@ -1,5 +1,4 @@
 ﻿using BaseDomain;
-using EscapeProjectApplication.Services;
 using EscapeProjectApplication.Services.Configuration;
 using EscapeProjectDomain;
 using UIApplication.Excel;
@@ -8,7 +7,7 @@ using UIDomain.Text;
 
 namespace EscapeProjectInfrastructure.Render
 {
-    public class ExcelRenderService : RenderService
+    public class ExcelRenderService : TaskRenderService
     {
         private readonly ExcelServiceFactory excelServiceFactory;
         private readonly ConfigurationService configService;
@@ -19,7 +18,7 @@ namespace EscapeProjectInfrastructure.Render
             this.configService = configService;
         }
 
-        public void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
+        public override void RenderTaskPlan(List<TaskGroupAggregate> taskGroups)
         {
             // Ensure the TaskPlans directory exists
             string taskPlansDir = configService.Settings.TaskPlansDirectoryPath;
@@ -63,11 +62,7 @@ namespace EscapeProjectInfrastructure.Render
                     excelService.RenderSelect(statusSelectBuilder);
 
                     excelService.CurrentPos = (excelService.CurrentPos.row, "Duration");
-                    var durationText = task.Duration();
-                    if (durationText == null)
-                    {
-                        durationText = "Unknown";
-                    }
+                    var durationText = GetFormattedDuration(task) ?? "Unknown";
 
                     var durationTextBuilder = new TextSettingsBuilder(durationText);
                     excelService.RenderText(durationTextBuilder);
