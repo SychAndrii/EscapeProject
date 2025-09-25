@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: ["main"]
   push:
-    branches: ["main"]
     tags: ["v*"]
 
 permissions:
@@ -224,8 +223,9 @@ jobs:
           if [ ! -f "TaskPlans/taskPlan.pdf" ]; then echo "❌ Missing taskPlan.pdf"; exit 1; fi
 
   release:
-    runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [windows-test, linux-test]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
