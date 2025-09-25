@@ -68,11 +68,8 @@ namespace EscapeProjectInfrastructure.Render
                     excelService.RenderText(durationTextBuilder);
 
                     excelService.CurrentPos = (excelService.CurrentPos.row, "Time Range");
-                    var rangeText = task.Range();
-                    if (rangeText == null)
-                    {
-                        rangeText = "Unknown";
-                    }
+                    var rangeText = GetFormattedRange(task);
+                    rangeText ??= "Unknown";
 
                     var rangeTextBuilder = new TextSettingsBuilder(rangeText)
                                                 .WithFontStyle(TextStyle.ITALIC);

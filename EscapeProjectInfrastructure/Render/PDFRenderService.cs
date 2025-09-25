@@ -73,7 +73,7 @@ namespace EscapeProjectInfrastructure.Render
                     pdfService.CurrentPos = (pdfService.CurrentPos.x, pdfService.CurrentPos.y + LINE_HEIGHT);
 
                     // Add the date/time line underneath (smaller font)
-                    var rangeText = task.Range();
+                    var rangeText = GetFormattedRange(task);
                     if (rangeText != null)
                     {
                         var timeTextBuilder = new TextSettingsBuilder(rangeText)

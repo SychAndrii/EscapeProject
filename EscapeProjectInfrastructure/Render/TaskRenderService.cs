@@ -37,6 +37,24 @@ namespace EscapeProjectInfrastructure.Render
             }
             return null;
         }
+
+        protected string? GetFormattedRange(TaskEntity task)
+        {
+            if (task.From != null && task.Until != null)
+            {
+                return $"{task.From.Value:yyyy-MM-dd HH:mm} – {task.Until.Value:yyyy-MM-dd HH:mm}";
+            }
+            else if (task.From != null)
+            {
+                return $"{task.From.Value:yyyy-MM-dd HH:mm} – ?";
+            }
+            else if (task.Until != null)
+            {
+                return $"? – {task.Until.Value:yyyy-MM-dd HH:mm}";
+            }
+            return null;
+        }
+
         public abstract void RenderTaskPlan(List<TaskGroupAggregate> taskGroups);
     }
 }

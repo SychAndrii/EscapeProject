@@ -50,23 +50,6 @@ namespace EscapeProjectDomain
             ? Until.Value - From.Value
             : null;
 
-        public NormalizedString? Range()
-        {
-            if (From != null && Until != null)
-            {
-                return $"{From.Value:yyyy-MM-dd HH:mm} – {Until.Value:yyyy-MM-dd HH:mm}";
-            }
-            else if (From != null)
-            {
-                return $"{From.Value:yyyy-MM-dd HH:mm} – ?";
-            }
-            else if (Until != null)
-            {
-                return $"? – {Until.Value:yyyy-MM-dd HH:mm}";
-            }
-            return null;
-        }
-
         protected override IEnumerable<object?> GetEqualityComponents()
         {
             yield return Name;
