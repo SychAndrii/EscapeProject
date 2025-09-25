@@ -40,19 +40,21 @@ namespace EscapeProjectInfrastructure.Render
 
         protected string? GetFormattedRange(TaskEntity task)
         {
-            if (task.From != null && task.Until != null)
+            DateTime? effectiveFrom = task.From ?? task.Subtasks?.Where(s => s.From != null).Min(s => s.From);
+            DateTime? effectiveUntil = task.Until ?? task.Subtasks?.Where(s => s.Until != null).Max(s => s.Until);
+
+            if (effectiveFrom != null && effectiveUntil != null)
             {
-                return $"{task.From.Value:yyyy-MM-dd HH:mm} – {task.Until.Value:yyyy-MM-dd HH:mm}";
+                return $"{effectiveFrom.Value:yyyy-MM-dd HH:mm} – {effectiveUntil.Value:yyyy-MM-dd HH:mm}";
             }
-            else if (task.From != null)
+            else if (effectiveFrom != null)
             {
-                return $"{task.From.Value:yyyy-MM-dd HH:mm} – ?";
+                return $"{effectiveFrom.Value:yyyy-MM-dd HH:mm} – ?";
             }
-            else if (task.Until != null)
+            else
             {
-                return $"? – {task.Until.Value:yyyy-MM-dd HH:mm}";
+                return effectiveUntil != null ? $"? – {effectiveUntil.Value:yyyy-MM-dd HH:mm}" : null;
             }
-            return null;
         }
 
         public abstract void RenderTaskPlan(List<TaskGroupAggregate> taskGroups);
